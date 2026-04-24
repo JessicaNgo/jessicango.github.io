@@ -1,0 +1,3082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jessica Ngo — senior software engineer</title>
+<meta name="description" content="Senior backend engineer. AI safety, async pipelines, cancer diagnostics. Ex-pro Counter-Strike. Vancouver, BC." />
+<meta name="author" content="Jessica Ngo" />
+<meta property="og:title" content="Jessica Ngo — senior software engineer" />
+<meta property="og:description" content="Senior backend engineer · ex-pro Counter-Strike · Vancouver, BC." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://jessicango.github.io/" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0a1e'/%3E%3Crect x='6' y='6' width='20' height='20' fill='%23f7d51d'/%3E%3Crect x='10' y='10' width='12' height='12' fill='%230b0a1e'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #0b0a1e;
+    --bg-deep:   #06051a;
+    --panel:     #16142e;
+    --panel-2:   #211e42;
+    --edge:      #2c2862;
+    --edge-2:    #3d3880;
+    --text:      #e8e6d4;
+    --dim:       #8e8ab5;
+    --dimmer:    #5a557e;
+    --gold:      #f7d51d;
+    --mint:      #5dcaa5;
+    --magenta:   #ed93b1;
+    --purple:    #9d94f0;
+    --red:       #e24b4a;
+    --cyan:      #7dd8ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    line-height: 1.35;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(157,148,240,0.12), transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(93,202,165,0.08), transparent 45%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  .press { font-family: 'Press Start 2P', monospace; letter-spacing: 0.5px; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+  img { image-rendering: pixelated; }
+  svg { shape-rendering: crispEdges; }
+
+  /* --- Scanlines overlay --- */
+  .scanlines {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.22) 0 2px,
+      transparent 2px 4px
+    );
+    pointer-events: none;
+    z-index: 200;
+    mix-blend-mode: multiply;
+  }
+
+  /* --- Parallax starfield --- */
+  .stars, .stars2, .stars3 {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+  }
+  .stars  { animation: drift 220s linear infinite; }
+  .stars2 { animation: drift 140s linear infinite; opacity: 0.5; }
+  .stars3 { animation: drift 80s  linear infinite; opacity: 0.35; }
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-2000px); }
+  }
+
+  /* --- Custom pixel cursor (applied on non-touch) --- */
+  @media (hover: hover) {
+    body, button, a {
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 10 10' shape-rendering='crispEdges'><rect x='0' y='0' width='2' height='2' fill='%230b0a1e'/><rect x='1' y='1' width='6' height='6' fill='%23f7d51d'/><rect x='2' y='2' width='4' height='4' fill='%23ed93b1'/></svg>") 4 4, auto;
+    }
+    a, button, .pin, .crate, .tab-btn, .member, .item, .quest-entry {
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 12 12' shape-rendering='crispEdges'><rect x='0' y='0' width='12' height='12' fill='%23f7d51d'/><rect x='1' y='1' width='10' height='10' fill='%230b0a1e'/><rect x='2' y='2' width='8' height='8' fill='%23ed93b1'/><rect x='4' y='4' width='4' height='4' fill='%23f7d51d'/></svg>") 6 6, pointer;
+    }
+  }
+
+  /* ========== TOP BAR ========== */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 14px;
+    /* right padding reserves room for the fixed theme/view toggles in the top-right */
+    padding: 10px 170px 10px 18px;
+    background: rgba(11, 10, 30, 0.92);
+    border-bottom: 3px solid var(--edge);
+    backdrop-filter: blur(3px);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+  }
+  .topbar .slot { color: var(--gold); }
+  .topbar .sep  { color: var(--dimmer); }
+  .topbar .top-loc  { color: var(--mint); }
+  .topbar .spacer { flex: 1; }
+  .topbar .hint {
+    color: var(--dim); font-size: 8px; letter-spacing: 1px;
+  }
+  .topbar .hint kbd {
+    display: inline-block; padding: 3px 5px;
+    border: 2px solid var(--edge-2);
+    color: var(--text);
+    font-family: inherit; font-size: 8px;
+    margin: 0 2px;
+  }
+  .topbar .coins {
+    color: var(--gold); font-size: 8px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .topbar .coins .c {
+    display: inline-block; width: 10px; height: 10px;
+    background: var(--gold);
+    box-shadow: inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;
+  }
+  .topbar button.icon-btn {
+    padding: 4px 8px;
+    border: 2px solid var(--edge-2);
+    font-size: 8px; color: var(--dim);
+  }
+  .topbar button.icon-btn:hover { color: var(--gold); border-color: var(--gold); }
+  .topbar button.icon-btn.on { color: var(--mint); border-color: var(--mint); }
+
+  /* ========== STAGE ========== */
+  .stage {
+    position: relative; z-index: 10;
+    min-height: calc(100vh - 48px);
+    padding: 20px;
+    display: flex; justify-content: center;
+  }
+
+  /* View swap */
+  .scene { display: none; width: 100%; max-width: 1080px; animation: fadein .25s steps(3); }
+  .scene.active { display: block; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ========== SCENE: WORLD MAP ========== */
+  .world {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    margin-top: 8px;
+  }
+  @media (max-width: 860px) {
+    .world { grid-template-columns: 1fr; }
+  }
+
+  .map-card {
+    background: linear-gradient(180deg, #0f0d26 0%, #1a1638 100%);
+    border: 4px solid var(--edge);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--edge);
+    padding: 22px;
+    position: relative;
+  }
+  .map-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 14px; gap: 10px;
+  }
+  .map-head h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px; color: var(--gold);
+    text-shadow: 3px 3px 0 #2a2200;
+  }
+  .map-head .caption {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--magenta); letter-spacing: 2px;
+    text-align: right;
+  }
+
+  .map-canvas {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background:
+      /* grid */
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px) 0 0 / 32px 32px,
+      /* biome tint */
+      radial-gradient(ellipse at 30% 70%, rgba(93,202,165,0.14), transparent 45%),
+      radial-gradient(ellipse at 80% 30%, rgba(237,147,177,0.14), transparent 45%),
+      radial-gradient(ellipse at 60% 60%, rgba(247,213,29,0.10), transparent 35%),
+      #0a0920;
+    border: 3px solid var(--edge);
+    overflow: hidden;
+  }
+  .map-canvas svg.terrain {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    image-rendering: pixelated;
+  }
+
+  /* Pins */
+  .pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px;
+    padding: 0;
+    z-index: 5;
+    transition: transform 0.15s steps(3);
+  }
+  .pin:hover { transform: translate(-50%, -108%); z-index: 10; }
+  .pin .marker {
+    width: 28px; height: 36px;
+    position: relative;
+  }
+  .pin .marker::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--color, var(--gold));
+    clip-path: polygon(50% 100%, 0 60%, 0 0, 100% 0, 100% 60%);
+    box-shadow:
+      inset -3px -3px 0 rgba(0,0,0,0.35),
+      inset 3px 3px 0 rgba(255,255,255,0.18);
+  }
+  .pin .marker::after {
+    content: var(--glyph, "?");
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: #0a0920;
+    position: absolute; top: 8px; left: 0; right: 0; text-align: center;
+  }
+  .pin .label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--text);
+    background: rgba(0,0,0,0.75);
+    border: 2px solid var(--edge-2);
+    padding: 4px 6px;
+    white-space: nowrap;
+    letter-spacing: 1px;
+  }
+  .pin:hover .label { color: var(--gold); border-color: var(--gold); }
+  .pin .pulse {
+    position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 10px; height: 3px; background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    animation: pulse 1.2s steps(6) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { width: 10px; opacity: 0.5; }
+    50%      { width: 18px; opacity: 0.8; }
+  }
+  .pin.visited .label::after {
+    content: " ✓"; color: var(--mint);
+  }
+
+  /* Player sprite on map */
+  .player-on-map {
+    position: absolute;
+    width: 28px; height: 28px;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    transition: left .5s steps(8), top .5s steps(8);
+    animation: bob 1s steps(2) infinite;
+  }
+  @keyframes bob {
+    0%, 100% { margin-top: 0; }
+    50%      { margin-top: -2px; }
+  }
+
+  /* Side panel */
+  .panel {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .card {
+    background: var(--panel);
+    border: 4px solid var(--edge);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--edge);
+    padding: 14px 16px;
+  }
+  .card h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: var(--gold); margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .card h3::before { content: "◆ "; color: var(--magenta); }
+
+  .stat-rows { display: flex; flex-direction: column; gap: 8px; }
+  .stat-row {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--dim);
+  }
+  .stat-row .k { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .stat-row .k .v { color: var(--text); }
+  .stat-row .bar {
+    height: 10px; background: #0a0920;
+    border: 2px solid var(--edge);
+    position: relative;
+  }
+  .stat-row .bar > span { display: block; height: 100%; }
+  .stat-row.hp .bar > span { background: var(--mint);  width: 96%; }
+  .stat-row.xp .bar > span { background: var(--gold);  width: 82%; }
+  .stat-row.mp .bar > span { background: var(--purple); width: 74%; }
+
+  .nav-list { display: flex; flex-direction: column; gap: 4px; }
+  .nav-btn {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px;
+    background: #0a0920;
+    border: 2px solid var(--edge);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px; color: var(--text);
+    letter-spacing: 1px;
+    text-align: left;
+    transition: all 0.1s steps(2);
+  }
+  .nav-btn:hover { border-color: var(--gold); color: var(--gold); transform: translate(-1px, -1px); }
+  .nav-btn .key { color: var(--dim); font-size: 8px; }
+  .nav-btn:hover .key { color: var(--gold); }
+
+  /* ========== LOCATION SHELL (shared) ========== */
+  .loc {
+    position: relative;
+    background: var(--panel);
+    border: 4px solid var(--edge);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--edge);
+    padding: 26px 28px 30px;
+    min-height: 60vh;
+  }
+  .loc-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 14px; margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 3px dashed var(--edge);
+  }
+  .loc-head .title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px; color: var(--gold);
+    text-shadow: 3px 3px 0 #2a2200;
+    margin-bottom: 6px;
+  }
+  .loc-head .sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px; color: var(--magenta); letter-spacing: 2px;
+  }
+  .back-btn {
+    padding: 6px 10px;
+    border: 2px solid var(--edge-2);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--text);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .back-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* --- Dialogue box (typewriter) --- */
+  .dialog {
+    background: #0a0920;
+    border: 3px solid var(--edge-2);
+    padding: 14px 16px 18px;
+    position: relative;
+    margin-bottom: 20px;
+    font-size: 20px;
+    line-height: 1.4;
+    min-height: 84px;
+  }
+  .dialog .speaker {
+    position: absolute; top: -12px; left: 14px;
+    background: var(--panel); padding: 0 8px;
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: var(--gold); letter-spacing: 1px;
+  }
+  .dialog .speaker .sprite-mini {
+    display: inline-block; width: 14px; height: 14px;
+    vertical-align: middle; margin-right: 4px;
+  }
+  .dialog .caret {
+    position: absolute; bottom: 4px; right: 10px;
+    color: var(--gold);
+    animation: blink 1s steps(2) infinite;
+  }
+  .dialog.done .caret { animation: blink 0.6s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .dialog .kw { color: var(--mint); font-weight: 500; }
+  .dialog .hot { color: var(--magenta); font-weight: 500; }
+  .dialog .hl  { color: var(--gold); font-weight: 500; }
+
+  /* ========== ARCHIVES (about) ========== */
+  .archives-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 720px) { .archives-grid { grid-template-columns: 1fr; } }
+
+  .sprite-frame {
+    width: 220px; height: 220px;
+    background: #0a0920;
+    border: 4px solid var(--edge-2);
+    display: grid; place-items: center;
+    margin: 0 auto;
+    position: relative;
+  }
+  .sprite-frame .overlay {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.2) 0 2px, transparent 2px 4px);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .sprite-frame svg { width: 160px; height: 160px; }
+  .sprite-frame .label {
+    position: absolute; bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    padding: 2px 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px; color: var(--dim); letter-spacing: 1px;
+    border: 2px solid var(--edge-2);
+    white-space: nowrap;
+  }
+
+  .loadout-card {
+    background: #0a0920;
+    border: 3px solid var(--edge-2);
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+  .loadout-card h4 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px; color: var(--magenta); letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+  .loadout-row {
+    display: grid; grid-template-columns: 110px 1fr;
+    gap: 10px; padding: 3px 0;
+    font-size: 19px;
+  }
+  .loadout-row .k {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--mint); letter-spacing: 1px;
+    padding-top: 5px;
+  }
+  .loadout-row .v { color: var(--text); }
+
+  .resume-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-top: 18px; padding: 10px 14px;
+    background: var(--gold); color: #1a1400;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; letter-spacing: 1px;
+    border: 3px solid #b89800;
+    box-shadow: 3px 3px 0 #1a1400;
+    text-decoration: none;
+    transition: transform .1s steps(2);
+  }
+  .resume-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #1a1400; }
+  .resume-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #1a1400; }
+
+  /* ========== QUEST BOARD (experience) ========== */
+  .quest-head-note {
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: var(--dim); letter-spacing: 1px; margin-bottom: 14px;
+  }
+  .quest {
+    background: #0a0920;
+    border: 3px solid var(--edge-2);
+    padding: 4px;
+  }
+  .quest-entry {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 14px;
+    padding: 14px 14px 16px;
+    border-bottom: 2px dashed var(--edge);
+    align-items: flex-start;
+  }
+  .quest-entry:last-child { border-bottom: none; }
+  .quest-entry .icon {
+    width: 28px; height: 28px;
+    background: var(--gold);
+    color: #1a1400;
+    font-family: 'Press Start 2P', monospace; font-size: 12px;
+    display: grid; place-items: center;
+    margin-top: 4px;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3);
+  }
+  .quest-entry.active .icon { background: var(--mint); color: #002018; }
+  .quest-entry.past   .icon { background: var(--purple); color: #0e0a2a; }
+  .quest-entry .role {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; color: var(--gold);
+    margin-bottom: 5px; letter-spacing: 1px;
+  }
+  .quest-entry.active .role { color: var(--mint); }
+  .quest-entry .org {
+    color: var(--magenta); font-size: 19px; margin-bottom: 6px;
+  }
+  .quest-entry .flavor {
+    color: var(--dim); font-size: 18px; font-style: italic;
+    margin-bottom: 8px;
+  }
+  .quest-entry ul {
+    list-style: none; padding-left: 0;
+    color: var(--text); font-size: 19px;
+  }
+  .quest-entry ul li {
+    padding-left: 18px; position: relative; margin-bottom: 3px;
+  }
+  .quest-entry ul li::before {
+    content: "+"; position: absolute; left: 0;
+    color: var(--mint); font-weight: 700;
+  }
+  .quest-entry .date {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--dim);
+    text-align: right; white-space: nowrap;
+    letter-spacing: 1px; line-height: 1.6;
+    min-width: 80px;
+  }
+  .quest-entry .xp {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: var(--gold); margin-top: 6px; letter-spacing: 1px;
+  }
+  .badge-active {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace; font-size: 7px;
+    color: #002018; background: var(--mint);
+    padding: 3px 5px; margin-left: 8px;
+    vertical-align: middle; letter-spacing: 1px;
+  }
+
+  /* ========== INVENTORY (projects) ========== */
+  .inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .crate {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(180deg, #2a2560 0%, #15122e 100%);
+    border: 4px solid var(--edge-2);
+    padding: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px;
+    overflow: hidden;
+    transition: transform 0.08s steps(2);
+  }
+  .crate:hover:not(.open) { transform: translate(-2px, -2px); border-color: var(--gold); }
+  .crate:hover:not(.open) .crate-lid { animation: shake 0.3s steps(4) infinite; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    25%      { transform: translate(-1px, 0); }
+    75%      { transform: translate(1px, 0); }
+  }
+  .crate.shake-once .crate-lid { animation: shake 0.3s steps(4) 2; }
+
+  .crate-closed {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 18px;
+  }
+  .crate-lid {
+    width: 90px; height: 90px;
+    position: relative;
+    background: repeating-linear-gradient(
+      45deg, var(--gold), var(--gold) 6px, #c9a800 6px, #c9a800 12px);
+    border: 4px solid #1a1400;
+    box-shadow: inset -4px -4px 0 rgba(0,0,0,0.3), inset 4px 4px 0 rgba(255,255,255,0.15);
+  }
+  .crate-lid::before {
+    content: "?";
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-family: 'Press Start 2P', monospace; font-size: 34px;
+    color: #1a1400;
+    text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
+  }
+  .crate.rarity-legendary .crate-lid {
+    background: repeating-linear-gradient(45deg, var(--gold), var(--gold) 6px, #c9a800 6px, #c9a800 12px);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.3), inset 4px 4px 0 rgba(255,255,255,0.15),
+      0 0 0 2px var(--gold), 0 0 18px rgba(247,213,29,0.6);
+  }
+  .crate.rarity-epic .crate-lid {
+    background: repeating-linear-gradient(45deg, var(--magenta), var(--magenta) 6px, #aa6080 6px, #aa6080 12px);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.3), inset 4px 4px 0 rgba(255,255,255,0.15),
+      0 0 0 2px var(--magenta), 0 0 14px rgba(237,147,177,0.5);
+  }
+  .crate.rarity-rare .crate-lid {
+    background: repeating-linear-gradient(45deg, var(--cyan), var(--cyan) 6px, #4a90b8 6px, #4a90b8 12px);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.3), inset 4px 4px 0 rgba(255,255,255,0.15),
+      0 0 0 2px var(--cyan), 0 0 12px rgba(125,216,255,0.4);
+  }
+
+  .crate-hint {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--text);
+    letter-spacing: 1.5px;
+    animation: blink 1.2s steps(2) infinite;
+  }
+  .crate .rarity-tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px; letter-spacing: 1.5px;
+    padding: 3px 6px;
+    background: rgba(0,0,0,0.5);
+  }
+  .crate.rarity-legendary .rarity-tag { color: var(--gold); }
+  .crate.rarity-epic      .rarity-tag { color: var(--magenta); }
+  .crate.rarity-rare      .rarity-tag { color: var(--cyan); }
+
+  .crate-content {
+    position: absolute; inset: 0;
+    padding: 12px 12px 12px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--panel);
+    overflow-y: auto;
+    /* keep scrollbar subtle so it doesn't fight the pixel-art vibe */
+    scrollbar-width: thin;
+    scrollbar-color: var(--edge-2) transparent;
+  }
+  .crate-content::-webkit-scrollbar { width: 6px; }
+  .crate-content::-webkit-scrollbar-thumb {
+    background: var(--edge-2); border-radius: 0;
+  }
+  .crate-content::-webkit-scrollbar-track { background: transparent; }
+  .crate.open .crate-closed { display: none; }
+  .crate.open .crate-content { display: flex; }
+  .crate.open { animation: burst 0.35s steps(5) 1; }
+  @keyframes burst {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .crate-content .rarity {
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    letter-spacing: 1.5px; margin-bottom: 2px;
+    flex-shrink: 0;
+  }
+  .crate.rarity-legendary .crate-content { border: 4px solid var(--gold); background: linear-gradient(180deg, #1f1700 0%, #16142e 40%); }
+  .crate.rarity-epic      .crate-content { border: 4px solid var(--magenta); background: linear-gradient(180deg, #2a1120 0%, #16142e 40%); }
+  .crate.rarity-rare      .crate-content { border: 4px solid var(--cyan); background: linear-gradient(180deg, #0a1e2a 0%, #16142e 40%); }
+  .crate-content h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px; color: var(--text);
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+  .crate-content p {
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 0;
+  }
+  .crate-content .tags { flex-shrink: 0; margin-top: auto; padding-top: 4px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-family: 'Press Start 2P', monospace; font-size: 7px;
+    padding: 3px 5px; background: #0a0920;
+    color: var(--mint); border: 2px solid var(--edge);
+    letter-spacing: 1px;
+  }
+  .inv-hint {
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: var(--dim); letter-spacing: 1px;
+    margin: 14px 0 4px; text-align: center;
+  }
+  .inv-hint .hl { color: var(--gold); }
+  .inv-footer {
+    margin-top: 14px;
+    font-size: 18px; color: var(--dim);
+    text-align: center;
+  }
+  .inv-footer a {
+    color: var(--cyan); border-bottom: 2px solid var(--cyan);
+  }
+  .inv-footer a:hover { color: var(--gold); border-color: var(--gold); }
+
+  /* ========== TROPHY ROOM ========== */
+  .trophy-banner {
+    position: relative;
+    background: linear-gradient(180deg, #1a0a2e 0%, #2a0f3a 100%);
+    border: 4px solid var(--magenta);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--magenta);
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .trophy-banner::before {
+    content: "!! SECRET AREA FOUND !!";
+    position: absolute; top: 6px; right: 12px;
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: var(--gold);
+    animation: blink 0.9s step-end infinite;
+    letter-spacing: 1px;
+  }
+  .trophy-banner p {
+    max-width: 720px; margin-top: 8px;
+  }
+  .trophy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .trophy-card {
+    background: rgba(0,0,0,0.4);
+    border: 3px solid var(--edge-2);
+    padding: 12px 14px 14px;
+    position: relative;
+  }
+  .trophy-card .medal {
+    position: absolute; top: -8px; right: -8px;
+    width: 32px; height: 32px;
+    background: var(--gold);
+    border: 3px solid #1a1400;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px; color: #1a1400;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  }
+  .trophy-card .team {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: var(--gold);
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .trophy-card .yr {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--dim);
+    margin-bottom: 8px; letter-spacing: 1.5px;
+  }
+  .trophy-card .note { color: var(--text); font-size: 18px; line-height: 1.4; }
+  .trophy-cta {
+    margin-top: 16px; text-align: center;
+  }
+  .trophy-cta a {
+    display: inline-block;
+    padding: 10px 16px;
+    background: #0a0920;
+    border: 3px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; letter-spacing: 1px;
+  }
+  .trophy-cta a:hover { background: var(--gold); color: #0a0920; }
+
+  /* ========== TAVERN (contact) ========== */
+  .party {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .member {
+    display: flex; gap: 12px; align-items: center;
+    background: #0a0920;
+    border: 3px solid var(--edge-2);
+    padding: 12px 14px;
+    text-decoration: none;
+    transition: all 0.1s steps(2);
+  }
+  .member:hover {
+    border-color: var(--mint); transform: translate(-2px, -2px);
+    box-shadow: 2px 2px 0 var(--edge);
+  }
+  .member .avatar {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: var(--panel-2);
+    border: 2px solid var(--edge);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px; color: var(--gold);
+    flex-shrink: 0;
+  }
+  .member .label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--dim); letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .member .handle {
+    font-size: 18px; color: var(--text);
+    word-break: break-all;
+  }
+  .tavern-note {
+    margin-top: 18px; padding: 14px 16px;
+    background: #0a0920;
+    border: 3px dashed var(--edge-2);
+    font-size: 19px; color: var(--text);
+  }
+  .tavern-note b { color: var(--gold); }
+
+  /* ========== ACHIEVEMENT TOASTS ========== */
+  .toast-stack {
+    position: fixed; top: 60px; right: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 300;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--panel);
+    border: 3px solid var(--gold);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    padding: 10px 14px 12px;
+    min-width: 260px; max-width: 320px;
+    animation: toast-in 0.3s steps(4), toast-out 0.3s steps(4) 3.7s forwards;
+  }
+  @keyframes toast-in {
+    from { transform: translateX(340px); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes toast-out {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(340px); opacity: 0; }
+  }
+  .toast .hdr {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--gold); letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .toast .hdr::before { content: "★ "; }
+  .toast .name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: var(--text); margin-bottom: 4px;
+  }
+  .toast .xp { font-size: 16px; color: var(--mint); }
+
+  /* ========== MINI TERMINAL ========== */
+  .miniterm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 400;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .miniterm-overlay.on { display: flex; }
+  .miniterm {
+    width: min(600px, 100%);
+    background: #0d1017;
+    border: 3px solid #1f2532;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    font-family: 'JetBrains Mono', monospace;
+    color: #d7d9df;
+    display: flex; flex-direction: column;
+    max-height: 80vh;
+  }
+  .miniterm .tbar {
+    padding: 8px 12px;
+    background: #080b10;
+    border-bottom: 1px solid #1f2532;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #6b7280;
+  }
+  .miniterm .tbar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .miniterm .tbar .dot.r { background: #ff5f56; }
+  .miniterm .tbar .dot.y { background: #ffbd2e; }
+  .miniterm .tbar .dot.g { background: #27c93f; }
+  .miniterm .tbar .path { flex: 1; text-align: center; }
+  .miniterm .tbar .close { color: #6b7280; padding: 0 4px; }
+  .miniterm .tbar .close:hover { color: #ff7b72; }
+  .miniterm .body {
+    flex: 1;
+    padding: 12px 14px;
+    overflow-y: auto;
+    font-size: 13px; line-height: 1.6;
+  }
+  .miniterm .prompt { color: #7ee787; }
+  .miniterm .dir { color: #79c0ff; }
+  .miniterm .kw { color: #79c0ff; }
+  .miniterm .hot { color: #ff9ec7; }
+  .miniterm .warn { color: #f2cc60; }
+  .miniterm .ok { color: #7ee787; }
+  .miniterm .muted { color: #6b7280; }
+  .miniterm .input-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px 10px;
+    border-top: 1px dashed #1f2532;
+  }
+  .miniterm input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #d7d9df; font-family: inherit; font-size: 13px;
+    caret-color: #7ee787;
+  }
+
+  /* ========== CS2 HUD (Konami easter egg) ========== */
+  .cs2-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 400;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .cs2-overlay.on { display: flex; }
+  .cs2-panel {
+    width: min(720px, 100%);
+    background: #0a0e12;
+    border: 2px solid #3a4a5a;
+    color: #d8dde3;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative;
+    padding: 0;
+  }
+  .cs2-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, #0e1821 0%, #070b10 100%);
+    border-bottom: 1px solid #3a4a5a;
+  }
+  .cs2-team {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Press Start 2P', monospace; font-size: 10px;
+  }
+  .cs2-team.ct { color: #7cc5ff; }
+  .cs2-team.t  { color: #f2a94a; }
+  .cs2-score { font-size: 26px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .cs2-timer {
+    font-family: 'Press Start 2P', monospace; font-size: 14px;
+    color: #d8dde3;
+  }
+  .cs2-body { padding: 22px 20px; }
+  .cs2-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px; color: #f7d51d; margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .cs2-log { list-style: none; padding: 0; font-size: 13.5px; }
+  .cs2-log li {
+    padding: 4px 0; border-bottom: 1px dashed #23303e;
+  }
+  .cs2-log li:last-child { border-bottom: none; }
+  .cs2-log .killer { color: #7cc5ff; }
+  .cs2-log .victim { color: #f2a94a; }
+  .cs2-log .wep { color: #b8c0c8; }
+  .cs2-log .hl { color: #ffd84a; }
+  .cs2-close {
+    position: absolute; top: 8px; right: 12px;
+    color: #9aa4b0; font-size: 18px;
+  }
+  .cs2-close:hover { color: #ff7b72; }
+  .cs2-hint {
+    margin-top: 14px; padding-top: 10px;
+    border-top: 1px solid #23303e;
+    font-size: 12px; color: #7b8694;
+  }
+
+  /* ========== GLOBAL HINT STRIP ========== */
+  .hint-strip {
+    position: fixed; bottom: 8px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,9,32,0.88);
+    border: 2px solid var(--edge);
+    padding: 5px 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px; color: var(--dim); letter-spacing: 1px;
+    z-index: 150;
+    pointer-events: none;
+  }
+  .hint-strip .k {
+    color: var(--text); padding: 2px 4px;
+    border: 1px solid var(--edge-2);
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ========== MOBILE ========== */
+  @media (max-width: 720px) {
+    body { font-size: 19px; }
+    .stage { padding: 12px; }
+    .loc { padding: 18px 16px 22px; }
+    .loc-head .title { font-size: 13px; }
+    .loc-head .sub { font-size: 8px; }
+    .quest-entry { grid-template-columns: 32px 1fr; }
+    .quest-entry .date { grid-column: 2; text-align: left; margin-top: 4px; }
+    .topbar { font-size: 8px; gap: 8px; padding: 8px 120px 8px 10px; }
+    .topbar .hint { display: none; }
+    .archives-grid { grid-template-columns: 1fr; }
+    .sprite-frame { width: 180px; height: 180px; }
+    .hint-strip { display: none; }
+    .top-right-toggles { top: 6px; right: 6px; gap: 6px; }
+    .view-toggle { font-size: 7px; padding: 5px 9px; }
+    .theme-toggle { font-size: 12px; padding: 4px 8px; min-width: 28px; }
+  }
+
+  /* ========================================================= */
+  /* ===============  TOP-RIGHT TOGGLES  ===================== */
+  /* ========================================================= */
+  .top-right-toggles {
+    position: fixed; top: 10px; right: 12px;
+    display: flex; gap: 8px; align-items: stretch;
+    z-index: 300;
+  }
+  .view-toggle, .theme-toggle {
+    background: var(--panel);
+    border: 2px solid var(--edge-2);
+    padding: 7px 12px 6px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; letter-spacing: 1.2px;
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    line-height: 1;
+  }
+  .theme-toggle {
+    font-family: system-ui, -apple-system, 'Segoe UI Symbol', sans-serif;
+    font-size: 14px; padding: 5px 10px;
+    min-width: 32px; text-align: center;
+  }
+  .view-toggle:hover, .theme-toggle:hover { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .view-toggle:focus-visible, .theme-toggle:focus-visible { outline: 2px dashed var(--cyan); outline-offset: 2px; }
+
+  /* ========================================================= */
+  /* ===============  CLEAN / RECRUITER VIEW  ================ */
+  /* ========================================================= */
+  #clean-view { display: none; }
+
+  body.clean-mode {
+    background: #0d0c20;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    font-smooth: auto;
+  }
+  body.clean-mode svg { shape-rendering: auto; }
+  body.clean-mode .scanlines,
+  body.clean-mode .stars,
+  body.clean-mode .stars2,
+  body.clean-mode .stars3,
+  body.clean-mode .topbar,
+  body.clean-mode .stage,
+  body.clean-mode .hint-strip,
+  body.clean-mode .toast-stack,
+  body.clean-mode .miniterm-overlay,
+  body.clean-mode .cs2-overlay,
+  body.clean-mode .coin-pickup {
+    display: none !important;
+  }
+  body.clean-mode #clean-view { display: block; }
+  body.clean-mode .view-toggle,
+  body.clean-mode .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--edge-2);
+    color: var(--dim);
+    letter-spacing: 0.2px;
+  }
+  body.clean-mode .view-toggle {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+  body.clean-mode .theme-toggle {
+    font-family: system-ui, -apple-system, 'Segoe UI Symbol', sans-serif;
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+  body.clean-mode .view-toggle:hover,
+  body.clean-mode .theme-toggle:hover {
+    color: var(--gold); border-color: var(--gold); background: transparent;
+  }
+
+  #clean-view {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 64px 32px 96px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #d4d2e8;
+  }
+  #clean-view .cv-header {
+    border-bottom: 1px solid #2c2862;
+    padding-bottom: 26px;
+    margin-bottom: 36px;
+  }
+  #clean-view .cv-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+  #clean-view .cv-title { font-size: 15px; color: var(--text); margin-bottom: 4px; }
+  #clean-view .cv-meta  { font-size: 13px; color: var(--dim); }
+  #clean-view .cv-links {
+    margin-top: 18px; display: flex; gap: 16px;
+    flex-wrap: wrap; font-size: 13px;
+  }
+  #clean-view .cv-links a {
+    color: var(--cyan);
+    border-bottom: 1px dotted rgba(125,216,255,0.5);
+    padding-bottom: 1px;
+  }
+  #clean-view .cv-links a:hover { color: var(--gold); border-color: var(--gold); }
+  #clean-view h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--mint);
+    letter-spacing: 1.5px;
+    margin: 40px 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2c2862;
+  }
+  #clean-view .cv-summary {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #e3e1f0;
+  }
+  #clean-view .cv-summary b { color: var(--gold); font-weight: 600; }
+  #clean-view .cv-job { margin-bottom: 26px; }
+  #clean-view .cv-job-head {
+    display: flex; justify-content: space-between;
+    gap: 12px; align-items: baseline;
+    margin-bottom: 2px; flex-wrap: wrap;
+  }
+  #clean-view .cv-role { font-weight: 700; color: var(--text); font-size: 14.5px; }
+  #clean-view .cv-date { color: var(--dim); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  #clean-view .cv-org { color: var(--gold); font-size: 13px; margin-bottom: 10px; }
+  #clean-view .cv-job ul { margin: 0 0 0 20px; padding: 0; }
+  #clean-view .cv-job li { margin-bottom: 6px; font-size: 13px; color: #c9c7dc; line-height: 1.6; }
+  #clean-view .cv-job li b { color: var(--gold); font-weight: 600; }
+  #clean-view .cv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  #clean-view .cv-proj {
+    border: 1px solid #2c2862;
+    padding: 16px 18px;
+    background: rgba(22, 20, 46, 0.55);
+  }
+  #clean-view .cv-proj h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9.5px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+  #clean-view .cv-proj p { font-size: 12.5px; color: #c9c7dc; line-height: 1.55; }
+  #clean-view .cv-proj .cv-tags {
+    margin-top: 10px; font-size: 11px; color: var(--dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  #clean-view .cv-teams {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  #clean-view .cv-team {
+    border-left: 2px solid var(--magenta);
+    padding: 2px 0 2px 14px;
+  }
+  #clean-view .cv-team-name { font-weight: 700; color: var(--text); font-size: 13px; }
+  #clean-view .cv-team-yr   { color: var(--dim); font-size: 12px; margin-top: 2px; }
+  #clean-view .cv-team-note { font-size: 12.5px; color: #c9c7dc; margin-top: 4px; line-height: 1.5; }
+  #clean-view .cv-esports-note { font-size: 13px; color: #c9c7dc; margin-top: 16px; line-height: 1.65; }
+  #clean-view .cv-foot {
+    margin-top: 56px; padding-top: 22px;
+    border-top: 1px solid #2c2862;
+    font-size: 12px; color: var(--dim);
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  #clean-view .cv-foot a { color: var(--cyan); }
+  #clean-view .cv-foot a:hover { color: var(--gold); }
+  #clean-view .cv-pubs li { margin-bottom: 4px; font-size: 13px; color: #c9c7dc; }
+  #clean-view .cv-pubs b { color: var(--gold); font-weight: 600; }
+  @media (max-width: 640px) {
+    #clean-view { padding: 52px 18px 64px; font-size: 13.5px; }
+    #clean-view .cv-name { font-size: 17px; }
+    #clean-view .cv-grid,
+    #clean-view .cv-teams { grid-template-columns: 1fr; }
+  }
+
+  /* ========================================================= */
+  /* ===============  LIGHT THEME (daytime)  ================= */
+  /* ========================================================= */
+  /*
+   * Design principle: light mode is "arcade cabinet in a sunny room".
+   * The outer chrome (topbar, cards, text, clean view) goes warm/cream.
+   * The inner pixel-art "game screens" (world map canvas, character
+   * sprite, open crates, trophy room) stay dark on purpose — they're
+   * CRT displays, they don't respond to the room lighting.
+   * Summoned overlays (mini-terminal, CS2 HUD) also stay dark.
+   */
+  body.light-theme {
+    /* warm daytime palette */
+    --bg:        #faf4e4;
+    --bg-deep:   #eee5cc;
+    --panel:     #f3e9c8;
+    --panel-2:   #e8d9a5;
+    --edge:      #c8b276;
+    --edge-2:    #8f7540;
+    --text:      #2a1f12;
+    --dim:       #6b5a38;
+    --dimmer:    #9e8a62;
+    --gold:      #b38500;
+    --mint:      #1f7a5c;
+    --magenta:   #a93b6a;
+    --purple:    #4a3fb0;
+    --red:       #b02e2d;
+    --cyan:      #1d6a92;
+
+    /* warm sun gradients replace the cold nebula */
+    background:
+      radial-gradient(ellipse at 50% 15%, rgba(179,133,0,0.14), transparent 55%),
+      radial-gradient(ellipse at 85% 95%, rgba(31,122,92,0.10), transparent 48%),
+      var(--bg);
+  }
+  /* hide the night sky during the day */
+  body.light-theme .stars,
+  body.light-theme .stars2,
+  body.light-theme .stars3 { display: none; }
+
+  /* faint warm CRT scanlines instead of black bars */
+  body.light-theme .scanlines {
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(90,70,30,0.07) 0 2px,
+      transparent 2px 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* chrome surfaces that had hardcoded dark values need overrides */
+  body.light-theme .topbar { background: rgba(243,233,200,0.92); }
+  body.light-theme .card  { background: linear-gradient(180deg, #f3e9c8 0%, #ecdfb1 100%); }
+  body.light-theme .quest-head { background: linear-gradient(180deg, #ecdfb1 0%, #d9c789 100%); }
+  body.light-theme .hint-strip { background: rgba(243,233,200,0.88); }
+  body.light-theme .tavern-note { background: rgba(255,243,204,0.6); }
+  body.light-theme .inv-hint,
+  body.light-theme .quest-head-note { background: rgba(255,243,204,0.5); }
+
+  /* dialog boxes keep their pixel-game vibe but warmer */
+  body.light-theme .dialog {
+    background: #fff8dc;
+    border-color: var(--edge-2);
+    color: var(--text);
+  }
+
+  /* back-btn / nav-btn readable on light chrome */
+  body.light-theme .back-btn,
+  body.light-theme .nav-btn {
+    background: var(--panel-2);
+    color: var(--text);
+  }
+  body.light-theme .back-btn:hover,
+  body.light-theme .nav-btn:hover { background: var(--gold); color: #fff8dc; }
+
+  /* save slot / top-loc text */
+  body.light-theme .topbar .slot,
+  body.light-theme .topbar .top-loc { color: var(--text); }
+
+  /* party / tavern member cards */
+  body.light-theme .party .member {
+    background: linear-gradient(180deg, #fff6c9 0%, #f0e0a0 100%);
+    border-color: var(--edge-2);
+    color: var(--text);
+  }
+
+  /* stat bars: keep the colorful fills, lighten the troughs */
+  body.light-theme .stat-row .bar { background: #d9c789; border-color: var(--edge-2); }
+
+  /* crate CLOSED state: light wood; OPEN state stays dark inside */
+  body.light-theme .crate-closed {
+    background: linear-gradient(180deg, #e8c77a 0%, #c99a44 100%);
+    border-color: var(--edge-2);
+  }
+  body.light-theme .crate-lid { background: #a67a2a; }
+  body.light-theme .rarity-tag { color: #fff8dc; }
+
+  /* clean-view under light theme */
+  body.light-theme.clean-mode { background: #faf6ea; }
+  body.light-theme #clean-view { color: #2a1f12; }
+  body.light-theme #clean-view .cv-header,
+  body.light-theme #clean-view h2,
+  body.light-theme #clean-view .cv-foot { border-color: #d9c789; }
+  body.light-theme #clean-view .cv-summary,
+  body.light-theme #clean-view .cv-job li,
+  body.light-theme #clean-view .cv-team-note,
+  body.light-theme #clean-view .cv-esports-note,
+  body.light-theme #clean-view .cv-pubs li,
+  body.light-theme #clean-view .cv-proj p { color: #3a2d1a; }
+  body.light-theme #clean-view .cv-proj {
+    background: rgba(255,248,220,0.7);
+    border-color: #d9c789;
+  }
+  body.light-theme #clean-view .cv-title { color: #2a1f12; }
+  body.light-theme #clean-view .cv-meta,
+  body.light-theme #clean-view .cv-date,
+  body.light-theme #clean-view .cv-foot { color: #6b5a38; }
+  body.light-theme #clean-view .cv-links a { border-color: rgba(29,106,146,0.5); }
+
+  /* -------- arcade content readability in light theme -------- */
+  /* Any panel that CONTAINS chrome text must go light so the
+     dark-on-cream var(--text) reads properly. Panels that are
+     purely pixel-art decoration (sprite frame, stat-row bars,
+     crate lids, miniterm, cs2 HUD) stay dark on purpose. */
+
+  body.light-theme .loadout-card,
+  body.light-theme .quest {
+    background: #fff8dc;
+    border-color: var(--edge-2);
+  }
+  body.light-theme .tavern-note {
+    background: #fff8dc;
+    border-color: var(--edge-2);
+    color: var(--text);
+  }
+  body.light-theme .tavern-note b { color: var(--gold); }
+
+  /* Tags inside open crates & projects — tan chip on light bg */
+  body.light-theme .tag {
+    background: #f0e0a0;
+    border-color: var(--edge);
+    color: var(--mint);
+  }
+
+  /* Party/member cards — light with readable text */
+  body.light-theme .member .handle { color: var(--text); }
+  body.light-theme .member .label  { color: var(--dim); }
+  body.light-theme .member .avatar {
+    background: var(--gold); color: #fff8dc; border-color: var(--edge-2);
+  }
+
+  /* Open crates (rarity gradients): replace dark gradients with
+     warm light ones so the rarity color rim still pops. */
+  body.light-theme .crate.rarity-legendary .crate-content {
+    background: linear-gradient(180deg, #fff4a8 0%, #f3e9c8 60%);
+    color: var(--text);
+  }
+  body.light-theme .crate.rarity-epic .crate-content {
+    background: linear-gradient(180deg, #ffd8e8 0%, #f3e9c8 60%);
+    color: var(--text);
+  }
+  body.light-theme .crate.rarity-rare .crate-content {
+    background: linear-gradient(180deg, #d4ecf8 0%, #f3e9c8 60%);
+    color: var(--text);
+  }
+  /* Closed crate backdrop — lighter so the gold lid doesn't disappear */
+  body.light-theme .crate {
+    background: linear-gradient(180deg, #e8d9a5 0%, #c8b276 100%);
+    border-color: var(--edge-2);
+  }
+
+  /* Trophy room — it's still the "secret area", but readable.
+     Keep a richer palette than the surrounding chrome (dusk, not night). */
+  body.light-theme .trophy-banner {
+    background: linear-gradient(180deg, #fff0e0 0%, #f5d9b8 100%);
+    border-color: var(--magenta);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--magenta);
+  }
+  body.light-theme .trophy-banner::before { color: var(--magenta); }
+  body.light-theme .trophy-card {
+    background: rgba(255,248,220,0.8);
+    border-color: var(--edge-2);
+  }
+  body.light-theme .trophy-card .note { color: var(--text); }
+  body.light-theme .trophy-card .medal {
+    border-color: var(--edge-2);
+    color: #fff8dc;
+    box-shadow: 3px 3px 0 rgba(90,70,30,0.3);
+  }
+  body.light-theme .trophy-cta a {
+    background: #fff8dc;
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  body.light-theme .trophy-cta a:hover {
+    background: var(--gold);
+    color: #fff8dc;
+  }
+
+  /* Resume button — keep the chunky gold CTA but adjust shadow color */
+  body.light-theme .resume-btn {
+    box-shadow: 3px 3px 0 #6b5a38;
+  }
+  body.light-theme .resume-btn:hover { box-shadow: 4px 4px 0 #6b5a38; }
+  body.light-theme .resume-btn:active { box-shadow: 1px 1px 0 #6b5a38; }
+
+  /* Dashed divider inside loc was var(--edge) dark — fine via var. */
+
+  /* Text-shadows on pixel titles look weird in light mode (they were
+     designed as dark drop shadows on dark bg) — soften to a sepia */
+  body.light-theme .loc-head .title,
+  body.light-theme .map-head h1,
+  body.light-theme .trophy-banner [style*="text-shadow"] { text-shadow: 2px 2px 0 rgba(139,108,48,0.35) !important; }
+
+  /* ------ Map card wrapper (the chrome around the pixel canvas) ---- */
+  body.light-theme .map-card {
+    background: linear-gradient(180deg, #f3e9c8 0%, #e8d9a5 100%);
+    border-color: var(--edge-2);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--edge-2);
+  }
+
+  /* ============ DAYTIME PIXEL MAP ============
+     Re-color the terrain SVG via CSS fill overrides.
+     CSS fills beat SVG fill="" attributes, so we can recolor the
+     whole world without touching a single rect tag.                  */
+
+  body.light-theme .map-canvas {
+    background:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 32px 32px,
+      radial-gradient(ellipse at 30% 70%, rgba(93,202,165,0.18), transparent 45%),
+      radial-gradient(ellipse at 80% 30%, rgba(255,183,77,0.20), transparent 45%),
+      radial-gradient(ellipse at 60% 60%, rgba(247,213,29,0.14), transparent 35%),
+      #bfe6ff; /* daytime sky blue behind the scene */
+    border-color: var(--edge-2);
+  }
+
+  /* Sky band (was dark navy) → day sky */
+  body.light-theme .terrain [fill="#140f2a"] { fill: #8ecdef; }
+  body.light-theme .terrain [fill="#1c1845"] { fill: #5ba5cc; }
+  body.light-theme .terrain [fill="#0f0a22"] { fill: #3a7aa0; }
+  /* Stars were #e8e6d4 (white) and #f7d51d (yellow) — but both colors
+     are also used elsewhere (snow caps, flag stripe, windows), so we
+     can't nuke them globally. Instead: wrap the star groups in CSS
+     attribute selectors targeting their small 1x1 sky-row positions. */
+  body.light-theme .terrain rect[y="8"][fill="#e8e6d4"],
+  body.light-theme .terrain rect[y="4"][fill="#e8e6d4"],
+  body.light-theme .terrain rect[y="10"][fill="#e8e6d4"],
+  body.light-theme .terrain rect[y="6"][fill="#e8e6d4"],
+  body.light-theme .terrain rect[y="14"][fill="#f7d51d"][width="1"],
+  body.light-theme .terrain rect[y="5"][fill="#f7d51d"][width="1"] {
+    display: none; /* daytime — no stars */
+  }
+  /* Moon (3 layered rects at x=20..25, y=6..11) → turn into a sun.
+     We can't hide just those rects easily via fill alone, but we can
+     recolor them to warm yellows to read as a sun. */
+  body.light-theme .terrain rect[x="20"][y="6"] { fill: #ffd84a; }
+  body.light-theme .terrain rect[x="21"][y="7"] { fill: #ffc52a; }
+  body.light-theme .terrain rect[x="23"][y="7"] { fill: #ff9a1f; }
+
+  /* Mountains */
+  body.light-theme .terrain [fill="#3a3268"] { fill: #8a8299; }
+  body.light-theme .terrain [fill="#4f4588"] { fill: #a8a0bd; }
+  /* snow caps were #e8e6d4 — keep white-ish (they're snow either way) */
+
+  /* Grass */
+  body.light-theme .terrain [fill="#2a5338"] { fill: #6bb560; }
+  body.light-theme .terrain g[fill="#1f402a"] { fill: #4f9e4a; }
+  body.light-theme .terrain g[fill="#3a6a48"] { fill: #83c77a; }
+
+  /* River (water stays blue, brighter in day) */
+  body.light-theme .terrain [fill="#2a3b72"] { fill: #5ba0e0; }
+  body.light-theme .terrain [fill="#3d55a0"] { fill: #7fb8ed; }
+  body.light-theme .terrain [fill="#1a2a55"] { fill: #4085c0; }
+  /* water sparkles #7dd8ff stay as-is */
+
+  /* Bridge — warmer wood tone in daylight */
+  body.light-theme .terrain [fill="#6a4a24"] { fill: #9c7a48; }
+  body.light-theme .terrain [fill="#8a6034"] { fill: #b88858; }
+  /* #4a2c14 appears on bridge + tree trunks + signpost — darken softly */
+  body.light-theme .terrain [fill="#4a2c14"] { fill: #6b4222; }
+
+  /* Forest (canopies) */
+  body.light-theme .terrain [fill="#1f5030"] { fill: #3fa858; }
+  body.light-theme .terrain [fill="#2a6238"] { fill: #55bf6d; }
+  body.light-theme .terrain [fill="#163a20"] { fill: #2f8240; }
+  body.light-theme .terrain [fill="#a97848"] { fill: #cfa070; }
+
+  /* Plaza (stone) */
+  body.light-theme .terrain [fill="#6a6a78"] { fill: #b8b8c2; }
+  body.light-theme .terrain [fill="#8a8a98"] { fill: #d2d2dc; }
+  body.light-theme .terrain [fill="#4a4a58"] { fill: #8a8a95; }
+  body.light-theme .terrain g[fill="#555565"] { fill: #9b9ba8; }
+
+  /* Archives building */
+  body.light-theme .terrain [fill="#3a3560"] { fill: #7a6fa0; }
+  body.light-theme .terrain [fill="#2a2548"] { fill: #5a4f85; }
+  body.light-theme .terrain [fill="#5a4a8a"] { fill: #9a8ec0; }
+  body.light-theme .terrain [fill="#4a3a78"] { fill: #847aab; }
+  body.light-theme .terrain [fill="#1a1230"] { fill: #3a2e60; }
+
+  /* Shop (pink) */
+  body.light-theme .terrain [fill="#7a3a58"] { fill: #c06890; }
+  body.light-theme .terrain [fill="#a05078"] { fill: #e287ab; }
+  body.light-theme .terrain [fill="#2a1230"] { fill: #4a2050; }
+
+  /* Tavern (warm browns) */
+  body.light-theme .terrain [fill="#6a3a1c"] { fill: #b07040; }
+  body.light-theme .terrain [fill="#8a4a24"] { fill: #c6895a; }
+  body.light-theme .terrain [fill="#3a1a08"] { fill: #7a4624; }
+  body.light-theme .terrain [fill="#4a2210"] { fill: #8a5030; }
+  body.light-theme .terrain [fill="#6a3018"] { fill: #a86838; }
+  body.light-theme .terrain [fill="#2a1008"] { fill: #6a3a1c; }
+
+  /* Smoke from chimney (keep but a bit whiter) */
+  body.light-theme .terrain g[fill="rgba(200,200,220,0.35)"] { fill: rgba(255,255,255,0.75); }
+
+  /* Paths */
+  body.light-theme .terrain g[fill="#b8a070"] { fill: #d8b070; }
+
+  /* Region labels — were off-white on dark; make dark on light */
+  body.light-theme .terrain g[font-family*="Press Start"] { fill: #2a1f12; opacity: 0.7; }
+
+  /* Pin labels on the daytime map — swap to light chip */
+  body.light-theme .pin .label {
+    background: #fff8dc; border-color: var(--edge-2); color: var(--text);
+  }
+  body.light-theme .pin:hover .label { color: var(--gold); border-color: var(--gold); }
+  body.light-theme .pin .marker::after { color: #2a1f12; }
+
+  /* Player sprite stays pixel-art dark; its colors look fine in daylight. */
+
+  /* -------- Topbar clearance for fixed toggles (both themes) -------- */
+  /* Also force the toggles to sit in the top-right corner even
+     in clean-mode, which they already do — just make sure the
+     save-slot text in topbar doesn't collide with them. */
+</style>
+</head>
+<body>
+
+<!-- ========== TOP-RIGHT TOGGLES (theme + view) ========== -->
+<div class="top-right-toggles">
+  <button class="theme-toggle" id="themeToggle" type="button"
+          aria-label="Toggle light/dark theme" title="Toggle light/dark">☀</button>
+  <button class="view-toggle" id="viewToggle" type="button"
+          aria-label="Toggle between arcade view and recruiter-friendly view">CLEAN VIEW</button>
+</div>
+
+<!-- Parallax starfields (generated via JS) -->
+<div class="stars"  id="stars1"></div>
+<div class="stars2" id="stars2"></div>
+<div class="stars3" id="stars3"></div>
+
+<!-- ========== TOP BAR ========== -->
+<div class="topbar">
+  <span class="slot">★ SAVE 01 — JESSICA NGO</span>
+  <span class="sep">·</span>
+  <span class="top-loc" id="topLoc">WORLD MAP</span>
+  <span class="spacer"></span>
+  <span class="coins" title="Collect 5 to unlock the end-game">
+    <span class="c"></span><span id="coinCount">0</span>/5
+  </span>
+  <span class="hint">
+    <kbd>1-5</kbd> travel · <kbd>0</kbd> map · <kbd>/</kbd> term
+  </span>
+  <button class="icon-btn" id="soundBtn" title="Sound FX (off by default)">SFX OFF</button>
+</div>
+
+<!-- ========== STAGE ========== -->
+<main class="stage">
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 0: WORLD MAP =================================== -->
+<!-- ===================================================================== -->
+<section class="scene active" id="scene-map">
+  <div class="world">
+
+    <div class="map-card">
+      <div class="map-head">
+        <div>
+          <h1>VANCOUVER — JESSICA'S OVERWORLD</h1>
+          <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;margin-top:6px;">
+            » SELECT A LOCATION TO TRAVEL. PROGRESS AUTOSAVES.
+          </div>
+        </div>
+        <div class="caption">
+          LV 28<br/><span style="color:var(--mint);">9 YRS ENG</span>
+        </div>
+      </div>
+
+      <div class="map-canvas" id="mapCanvas">
+        <!-- Terrain: pixel-art tiles. viewBox 160x90, each tile = 4px. -->
+        <svg class="terrain" viewBox="0 0 160 90" preserveAspectRatio="none">
+          <!-- BASE: grass tile fill (dither band) -->
+          <rect x="0" y="40" width="160" height="50" fill="#2a5338"/>
+          <!-- grass dither dots -->
+          <g fill="#1f402a">
+            <rect x="4" y="48" width="1" height="1"/><rect x="12" y="56" width="1" height="1"/>
+            <rect x="28" y="72" width="1" height="1"/><rect x="44" y="80" width="1" height="1"/>
+            <rect x="60" y="62" width="1" height="1"/><rect x="78" y="74" width="1" height="1"/>
+            <rect x="96" y="58" width="1" height="1"/><rect x="116" y="82" width="1" height="1"/>
+            <rect x="136" y="68" width="1" height="1"/><rect x="152" y="54" width="1" height="1"/>
+            <rect x="20" y="84" width="1" height="1"/><rect x="88" y="84" width="1" height="1"/>
+          </g>
+          <g fill="#3a6a48">
+            <rect x="8"  y="64" width="2" height="1"/><rect x="36" y="78" width="2" height="1"/>
+            <rect x="74" y="82" width="2" height="1"/><rect x="110" y="62" width="2" height="1"/>
+            <rect x="144" y="86" width="2" height="1"/>
+          </g>
+
+          <!-- SKY: dark sky band with pixel stars -->
+          <rect x="0" y="0" width="160" height="40" fill="#140f2a"/>
+          <rect x="0" y="40" width="160" height="1" fill="#1c1845"/>
+          <rect x="0" y="41" width="160" height="1" fill="#0f0a22"/>
+          <g fill="#e8e6d4">
+            <rect x="16" y="8"  width="1" height="1"/><rect x="40" y="4" width="1" height="1"/>
+            <rect x="64" y="10" width="1" height="1"/><rect x="98" y="6" width="1" height="1"/>
+            <rect x="146" y="10" width="1" height="1"/>
+          </g>
+          <g fill="#f7d51d">
+            <rect x="54" y="14" width="1" height="1"/><rect x="124" y="5" width="1" height="1"/>
+          </g>
+          <!-- moon -->
+          <rect x="20" y="6" width="6" height="6" fill="#e8e6d4"/>
+          <rect x="21" y="7" width="4" height="4" fill="#d2cfbc"/>
+          <rect x="23" y="7" width="2" height="2" fill="#b5b29e"/>
+
+          <!-- MOUNTAIN REGION (top-right, trophy hall) -->
+          <polygon points="108,40 120,20 132,26 144,14 156,24 160,30 160,40" fill="#3a3268"/>
+          <polygon points="120,20 126,26 132,26" fill="#4f4588"/>
+          <polygon points="144,14 150,22 156,24" fill="#4f4588"/>
+          <!-- snow caps -->
+          <polygon points="120,20 122,22 124,22 126,24 128,22 130,24 132,26" fill="#e8e6d4"/>
+          <polygon points="144,14 146,16 148,16 150,18 152,20 154,20 156,24" fill="#e8e6d4"/>
+          <!-- flag on peak -->
+          <rect x="147" y="10" width="1" height="4" fill="#2a1a3a"/>
+          <rect x="148" y="10" width="3" height="2" fill="#ed93b1"/>
+
+          <!-- LAKE / RIVER (horizontal band at tile rows) -->
+          <rect x="36" y="50" width="60" height="6" fill="#2a3b72"/>
+          <rect x="36" y="50" width="60" height="1" fill="#3d55a0"/>
+          <rect x="36" y="55" width="60" height="1" fill="#1a2a55"/>
+          <!-- water sparkles -->
+          <g fill="#7dd8ff">
+            <rect x="44" y="52" width="1" height="1"/>
+            <rect x="60" y="53" width="1" height="1"/>
+            <rect x="78" y="52" width="1" height="1"/>
+            <rect x="88" y="54" width="1" height="1"/>
+          </g>
+          <!-- bridge across river -->
+          <rect x="68" y="49" width="8" height="1" fill="#6a4a24"/>
+          <rect x="68" y="50" width="8" height="6" fill="#8a6034"/>
+          <rect x="68" y="56" width="8" height="1" fill="#4a2c14"/>
+          <rect x="69" y="50" width="1" height="6" fill="#6a4a24"/>
+          <rect x="73" y="50" width="1" height="6" fill="#6a4a24"/>
+
+          <!-- FOREST (bottom-left, quest board region) -->
+          <!-- tree clumps: trunk + canopy -->
+          <g>
+            <rect x="10" y="66" width="2" height="4" fill="#4a2c14"/>
+            <rect x="8"  y="62" width="6" height="4" fill="#1f5030"/>
+            <rect x="9"  y="60" width="4" height="2" fill="#2a6238"/>
+            <rect x="9"  y="64" width="4" height="2" fill="#163a20"/>
+          </g>
+          <g>
+            <rect x="22" y="72" width="2" height="4" fill="#4a2c14"/>
+            <rect x="20" y="68" width="6" height="4" fill="#1f5030"/>
+            <rect x="21" y="66" width="4" height="2" fill="#2a6238"/>
+          </g>
+          <g>
+            <rect x="4" y="78" width="2" height="4" fill="#4a2c14"/>
+            <rect x="2" y="74" width="6" height="4" fill="#1f5030"/>
+            <rect x="3" y="72" width="4" height="2" fill="#2a6238"/>
+          </g>
+          <g>
+            <rect x="34" y="78" width="2" height="4" fill="#4a2c14"/>
+            <rect x="32" y="74" width="6" height="4" fill="#1f5030"/>
+            <rect x="33" y="72" width="4" height="2" fill="#2a6238"/>
+          </g>
+          <!-- quest signpost in forest -->
+          <rect x="16" y="74" width="1" height="6" fill="#4a2c14"/>
+          <rect x="14" y="72" width="6" height="4" fill="#8a6034"/>
+          <rect x="14" y="72" width="6" height="1" fill="#a97848"/>
+
+          <!-- TOWN SQUARE center (archives) - stone plaza -->
+          <rect x="52" y="58" width="20" height="18" fill="#6a6a78"/>
+          <rect x="52" y="58" width="20" height="1"  fill="#8a8a98"/>
+          <rect x="52" y="75" width="20" height="1"  fill="#4a4a58"/>
+          <!-- plaza tile grid -->
+          <g fill="#555565">
+            <rect x="56" y="58" width="1" height="18"/>
+            <rect x="60" y="58" width="1" height="18"/>
+            <rect x="64" y="58" width="1" height="18"/>
+            <rect x="68" y="58" width="1" height="18"/>
+            <rect x="52" y="62" width="20" height="1"/>
+            <rect x="52" y="67" width="20" height="1"/>
+            <rect x="52" y="71" width="20" height="1"/>
+          </g>
+          <!-- Archives building on plaza -->
+          <rect x="58" y="48" width="10" height="10" fill="#3a3560"/>
+          <rect x="58" y="46" width="10" height="2"  fill="#2a2548"/>
+          <polygon points="57,46 69,46 63,41" fill="#5a4a8a"/>
+          <polygon points="57,46 69,46 63,42" fill="#4a3a78"/>
+          <rect x="61" y="52" width="4" height="6" fill="#1a1230"/>
+          <rect x="62" y="53" width="2" height="2" fill="#f7d51d"/>
+          <rect x="60" y="50" width="1" height="2" fill="#7dd8ff"/>
+          <rect x="65" y="50" width="1" height="2" fill="#7dd8ff"/>
+
+          <!-- SHOP building (top-center-left of grass area) -->
+          <rect x="24" y="46" width="14" height="8" fill="#7a3a58"/>
+          <rect x="24" y="46" width="14" height="1" fill="#a05078"/>
+          <!-- striped awning -->
+          <rect x="23" y="44" width="16" height="2" fill="#ed93b1"/>
+          <rect x="25" y="44" width="2" height="2" fill="#f7d51d"/>
+          <rect x="29" y="44" width="2" height="2" fill="#f7d51d"/>
+          <rect x="33" y="44" width="2" height="2" fill="#f7d51d"/>
+          <!-- door -->
+          <rect x="30" y="49" width="2" height="5" fill="#2a1230"/>
+          <!-- sign -->
+          <rect x="26" y="47" width="10" height="1" fill="#f7d51d"/>
+
+          <!-- TAVERN (bottom-right) -->
+          <rect x="112" y="60" width="16" height="12" fill="#6a3a1c"/>
+          <rect x="112" y="60" width="16" height="1"  fill="#8a4a24"/>
+          <rect x="112" y="71" width="16" height="1"  fill="#3a1a08"/>
+          <!-- roof -->
+          <polygon points="110,60 130,60 128,54 112,54" fill="#4a2210"/>
+          <rect x="113" y="55" width="14" height="1" fill="#6a3018"/>
+          <!-- door -->
+          <rect x="119" y="64" width="2" height="8" fill="#2a1008"/>
+          <rect x="120" y="67" width="1" height="1" fill="#f7d51d"/>
+          <!-- window with light -->
+          <rect x="114" y="62" width="3" height="3" fill="#f7d51d"/>
+          <rect x="115" y="63" width="1" height="1" fill="#2a1008"/>
+          <rect x="123" y="62" width="3" height="3" fill="#f7d51d"/>
+          <rect x="124" y="63" width="1" height="1" fill="#2a1008"/>
+          <!-- chimney smoke -->
+          <rect x="124" y="52" width="2" height="3" fill="#3a1a08"/>
+          <g fill="rgba(200,200,220,0.35)">
+            <rect x="124" y="48" width="2" height="2"/>
+            <rect x="122" y="44" width="2" height="2"/>
+            <rect x="126" y="40" width="2" height="2"/>
+          </g>
+
+          <!-- PATHS connecting hubs (dotted road) -->
+          <g fill="#b8a070">
+            <!-- shop → archives diagonal -->
+            <rect x="38" y="54" width="2" height="2"/>
+            <rect x="42" y="56" width="2" height="2"/>
+            <rect x="48" y="58" width="2" height="2"/>
+            <!-- archives → mountain up-right -->
+            <rect x="72" y="58" width="2" height="2"/>
+            <rect x="78" y="54" width="2" height="2"/>
+            <rect x="86" y="50" width="2" height="2"/>
+            <rect x="98" y="48" width="2" height="2"/>
+            <rect x="108" y="44" width="2" height="2"/>
+            <!-- archives → tavern right -->
+            <rect x="76" y="64" width="2" height="2"/>
+            <rect x="84" y="64" width="2" height="2"/>
+            <rect x="94" y="64" width="2" height="2"/>
+            <rect x="104" y="64" width="2" height="2"/>
+            <!-- archives → forest / quest left-down -->
+            <rect x="46" y="66" width="2" height="2"/>
+            <rect x="40" y="70" width="2" height="2"/>
+            <rect x="32" y="74" width="2" height="2"/>
+            <rect x="24" y="76" width="2" height="2"/>
+          </g>
+
+          <!-- REGION LABELS (small pixel-style) -->
+          <g font-family="'Press Start 2P', monospace" font-size="3" fill="#e8e6d4" opacity="0.55">
+            <text x="4" y="88">FOREST · QUESTS</text>
+            <text x="52" y="88">TOWN · ARCHIVES</text>
+            <text x="110" y="88">HARBOUR · TAVERN</text>
+            <text x="116" y="38">PEAKS · TROPHIES</text>
+            <text x="22" y="42">MARKET · SHOP</text>
+          </g>
+        </svg>
+
+        <!-- Player avatar: girl w/ long hair + mint headphones -->
+        <div class="player-on-map" id="mapAvatar" style="left: 50%; top: 72%;">
+          <svg viewBox="0 0 16 16">
+            <!-- long hair back -->
+            <rect x="3" y="3" width="10" height="10" fill="#1c1228"/>
+            <rect x="2" y="5" width="1"  height="8"  fill="#1c1228"/>
+            <rect x="13" y="5" width="1" height="8"  fill="#1c1228"/>
+            <!-- face -->
+            <rect x="4" y="4" width="8" height="5" fill="#f3c7a0"/>
+            <rect x="3" y="3" width="10" height="2" fill="#2a1a3a"/>
+            <!-- bangs -->
+            <rect x="4" y="4" width="8" height="1" fill="#2a1a3a"/>
+            <rect x="5" y="5" width="2" height="1" fill="#2a1a3a"/>
+            <!-- eyes + mouth -->
+            <rect x="6" y="6" width="1" height="1" fill="#0b0a1e"/>
+            <rect x="9" y="6" width="1" height="1" fill="#0b0a1e"/>
+            <rect x="7" y="8" width="2" height="1" fill="#c24a6a"/>
+            <!-- headphones (mint) -->
+            <rect x="3" y="3" width="1"  height="4" fill="#5dcaa5"/>
+            <rect x="12" y="3" width="1" height="4" fill="#5dcaa5"/>
+            <rect x="4" y="2" width="8" height="1" fill="#5dcaa5"/>
+            <!-- body / hoodie -->
+            <rect x="3" y="10" width="10" height="4" fill="#8a4aa5"/>
+            <rect x="3" y="10" width="10" height="1" fill="#a05cc0"/>
+            <rect x="6" y="11" width="4" height="2" fill="#6a3488"/>
+          </svg>
+        </div>
+
+        <!-- Pins: positioned as % of map -->
+        <button class="pin" data-loc="archives" style="--color:var(--cyan); --glyph:'i'; left: 40%; top: 58%;">
+          <div class="marker"></div>
+          <div class="label">ARCHIVES</div>
+          <div class="pulse"></div>
+        </button>
+
+        <button class="pin" data-loc="quest-board" style="--color:var(--mint); --glyph:'!'; left: 11%; top: 82%;">
+          <div class="marker"></div>
+          <div class="label">QUEST BOARD</div>
+          <div class="pulse"></div>
+        </button>
+
+        <button class="pin" data-loc="inventory" style="--color:var(--magenta); --glyph:'i'; left: 19%; top: 55%;">
+          <div class="marker"></div>
+          <div class="label">SHOP</div>
+          <div class="pulse"></div>
+        </button>
+
+        <button class="pin" data-loc="trophy" style="--color:var(--gold); --glyph:'★'; left: 90%; top: 22%;">
+          <div class="marker"></div>
+          <div class="label">TROPHY HALL</div>
+          <div class="pulse"></div>
+        </button>
+
+        <button class="pin" data-loc="tavern" style="--color:#c47048; --glyph:'a'; left: 75%; top: 73%;">
+          <div class="marker"></div>
+          <div class="label">TAVERN</div>
+          <div class="pulse"></div>
+        </button>
+
+        <!-- Hidden coin #1: tiny glint on the mountain -->
+        <button class="coin-pickup" data-coin="1"
+          style="position:absolute;left:84%;top:15%;width:14px;height:14px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;"
+          title="shiny..." aria-label="hidden coin"></button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;">
+        <span>» TIP: HOVER PINS</span>
+        <span>KEYS 1-5 TO FAST-TRAVEL</span>
+      </div>
+    </div>
+
+    <!-- Right side panel -->
+    <aside class="panel">
+      <div class="card">
+        <h3>PLAYER</h3>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+          <div style="width:48px;height:48px;background:#0a0920;border:2px solid var(--edge-2);display:grid;place-items:center;flex-shrink:0;">
+            <svg viewBox="0 0 16 16" width="36" height="36">
+              <rect x="5" y="2" width="6" height="2" fill="#2a1a3a"/>
+              <rect x="4" y="4" width="8" height="4" fill="#f3c7a0"/>
+              <rect x="3" y="5" width="1" height="2" fill="#5dcaa5"/>
+              <rect x="12" y="5" width="1" height="2" fill="#5dcaa5"/>
+              <rect x="6" y="6" width="1" height="1" fill="#0b0a1e"/>
+              <rect x="9" y="6" width="1" height="1" fill="#0b0a1e"/>
+              <rect x="3" y="9" width="10" height="5" fill="#534ab7"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);letter-spacing:1px;">JESSICA NGO</div>
+            <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--magenta);letter-spacing:1.5px;margin-top:4px;">SR. BACKEND / CLASS: RED TEAM</div>
+          </div>
+        </div>
+
+        <div class="stat-rows">
+          <div class="stat-row hp">
+            <div class="k"><span>HP</span><span class="v">96 / 100</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+          <div class="stat-row xp">
+            <div class="k"><span>XP — LV 28</span><span class="v">82%</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+          <div class="stat-row mp">
+            <div class="k"><span>MP (caffeine)</span><span class="v">74%</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>FAST TRAVEL</h3>
+        <div class="nav-list">
+          <button class="nav-btn" data-loc="archives">ARCHIVES <span class="key">[1]</span></button>
+          <button class="nav-btn" data-loc="quest-board">QUEST BOARD <span class="key">[2]</span></button>
+          <button class="nav-btn" data-loc="inventory">SHOP <span class="key">[3]</span></button>
+          <button class="nav-btn" data-loc="trophy">TROPHY HALL <span class="key">[4]</span></button>
+          <button class="nav-btn" data-loc="tavern">TAVERN <span class="key">[5]</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>QUICK STATS</h3>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-family:'Press Start 2P',monospace;font-size:8px;letter-spacing:1px;">
+          <span style="color:var(--dim);">ENG</span><span style="color:var(--text);">~9 YEARS</span>
+          <span style="color:var(--dim);">CS</span><span style="color:var(--text);">2.5 YEARS PRO</span>
+          <span style="color:var(--dim);">PAPERS</span><span style="color:var(--text);">CELL + NATURE SR</span>
+          <span style="color:var(--dim);">SHIP</span><span style="color:var(--mint);">LLM PENTEST PLATFORM</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 1: ARCHIVES (about) ============================ -->
+<!-- ===================================================================== -->
+<section class="scene" id="scene-archives">
+  <div class="loc">
+    <div class="loc-head">
+      <div>
+        <div class="title">◆ THE ARCHIVES</div>
+        <div class="sub">» ABOUT.MD  ·  CHAPTER 01</div>
+      </div>
+      <button class="back-btn" data-loc="map">← WORLD MAP</button>
+    </div>
+
+    <div class="dialog" data-typewriter="archives">
+      <div class="speaker">NGO, SR. BACKEND</div>
+      <span class="content"></span>
+      <span class="caret">▼</span>
+    </div>
+
+    <div class="archives-grid">
+      <div>
+        <div class="sprite-frame">
+          <svg viewBox="0 0 16 16" id="heroSprite">
+            <!-- long hair back layer -->
+            <rect x="2"  y="4" width="12" height="10" fill="#1c1228"/>
+            <rect x="1"  y="6" width="1"  height="8"  fill="#1c1228"/>
+            <rect x="14" y="6" width="1"  height="8"  fill="#1c1228"/>
+            <rect x="2"  y="13" width="2" height="1" fill="#1c1228"/>
+            <rect x="12" y="13" width="2" height="1" fill="#1c1228"/>
+            <!-- face -->
+            <rect x="4" y="4" width="8" height="5" fill="#f3c7a0"/>
+            <!-- bangs / hairline -->
+            <rect x="3" y="3" width="10" height="2" fill="#2a1a3a"/>
+            <rect x="4" y="4" width="2"  height="1" fill="#2a1a3a"/>
+            <rect x="10" y="4" width="2" height="1" fill="#2a1a3a"/>
+            <rect x="5"  y="5" width="1" height="1" fill="#2a1a3a"/>
+            <!-- eyes -->
+            <rect class="eye" x="6" y="6" width="1" height="1" fill="#0b0a1e"/>
+            <rect class="eye" x="9" y="6" width="1" height="1" fill="#0b0a1e"/>
+            <!-- blush + mouth -->
+            <rect x="5" y="7" width="1" height="1" fill="#e8a8b0" opacity="0.7"/>
+            <rect x="10" y="7" width="1" height="1" fill="#e8a8b0" opacity="0.7"/>
+            <rect x="7" y="8" width="2" height="1" fill="#c24a6a"/>
+            <!-- headphones (mint) -->
+            <rect x="3"  y="3" width="1" height="4" fill="#5dcaa5"/>
+            <rect x="12" y="3" width="1" height="4" fill="#5dcaa5"/>
+            <rect x="4"  y="2" width="8" height="1" fill="#5dcaa5"/>
+            <rect x="3"  y="4" width="1" height="2" fill="#3aa080"/>
+            <rect x="12" y="4" width="1" height="2" fill="#3aa080"/>
+            <!-- neck -->
+            <rect x="7" y="9" width="2" height="1" fill="#d8a880"/>
+            <!-- hoodie body -->
+            <rect x="3" y="10" width="10" height="4" fill="#534ab7"/>
+            <rect x="3" y="10" width="10" height="1" fill="#6a62d0"/>
+            <!-- hoodie drawstrings -->
+            <rect x="6"  y="10" width="1" height="3" fill="#c8c0e8"/>
+            <rect x="9"  y="10" width="1" height="3" fill="#c8c0e8"/>
+            <!-- front pocket -->
+            <rect x="5" y="12" width="6" height="2" fill="#3c3489"/>
+            <!-- arms -->
+            <rect class="arm-l" x="2" y="10" width="1" height="3" fill="#534ab7"/>
+            <rect class="arm-r" x="13" y="10" width="1" height="3" fill="#534ab7"/>
+            <!-- legs -->
+            <rect x="4" y="14" width="8" height="1" fill="#16142e"/>
+            <rect x="4" y="15" width="3" height="1" fill="#2c2862"/>
+            <rect x="9" y="15" width="3" height="1" fill="#2c2862"/>
+          </svg>
+          <div class="overlay"></div>
+          <div class="label">NGO.SPR  ·  IDLE</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:18px;font-family:'Press Start 2P',monospace;font-size:8px;letter-spacing:1px;">
+          <div style="color:var(--dim);">LOCATION  <span style="color:var(--text);float:right;">VANCOUVER</span></div>
+          <div style="color:var(--dim);">GUILD     <span style="color:var(--mint);float:right;">ALLTRUE.AI</span></div>
+          <div style="color:var(--dim);">ALIGNMENT <span style="color:var(--gold);float:right;">LAWFUL ASYNC</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:19px;line-height:1.5;color:var(--text);">
+          <p style="margin-bottom:12px;">
+            I'm a senior backend engineer. Currently at
+            <span style="color:var(--mint);">Alltrue.ai</span>, I own the backend for an
+            AI safety &amp; compliance product shipped to clients worldwide. I like
+            async systems, dense pipelines, and the kind of monitoring that lets
+            you sleep through on-call.
+          </p>
+          <p style="margin-bottom:12px;">
+            Before that, I spent five years writing cancer-diagnostics software
+            (my work shows up in papers published in <b style="color:var(--gold);">Cell</b> and
+            <b style="color:var(--gold);">Nature Scientific Reports</b>), and 2.5 years as a
+            professional <span style="color:var(--magenta);">Counter-Strike</span> player —
+            captaining rosters for Evil Geniuses, Nouns, and Team Canada.
+          </p>
+          <p style="color:var(--dim);font-style:italic;">
+            Gamer + builder, all in one.
+          </p>
+        </div>
+
+        <div class="loadout-card">
+          <h4>» LOADOUT</h4>
+          <div class="loadout-row"><span class="k">LANGUAGES</span><span class="v">Python · Java · C/C++</span></div>
+          <div class="loadout-row"><span class="k">DATASTORES</span><span class="v">PostgreSQL · MySQL · MongoDB · Redis</span></div>
+          <div class="loadout-row"><span class="k">CLOUD</span><span class="v">AWS — ECS · Lambda · S3 · EventBridge · Bedrock</span></div>
+          <div class="loadout-row"><span class="k">APIs</span><span class="v">REST · GraphQL · Pydantic schemas</span></div>
+          <div class="loadout-row"><span class="k">ML</span><span class="v">vector embeddings · Hugging Face · LLM evals</span></div>
+        </div>
+
+        <a class="resume-btn" href="assets/resume.pdf" download data-achievement="fineprint">
+          ↓ DOWNLOAD RESUME.PDF
+        </a>
+      </div>
+    </div>
+
+    <!-- hidden coin #2 behind sprite label -->
+    <button class="coin-pickup" data-coin="2"
+      style="position:absolute;right:26px;bottom:22px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      title="shiny..." aria-label="hidden coin"></button>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 2: QUEST BOARD (experience) ==================== -->
+<!-- ===================================================================== -->
+<section class="scene" id="scene-quest-board">
+  <div class="loc">
+    <div class="loc-head">
+      <div>
+        <div class="title">◆ THE QUEST BOARD</div>
+        <div class="sub">» EXPERIENCE.LOG  ·  5 ENTRIES</div>
+      </div>
+      <button class="back-btn" data-loc="map">← WORLD MAP</button>
+    </div>
+
+    <div class="dialog" data-typewriter="quest">
+      <div class="speaker">INNKEEPER</div>
+      <span class="content"></span>
+      <span class="caret">▼</span>
+    </div>
+
+    <div class="quest-head-note">» SORTED NEWEST → OLDEST. CLICK ENTRY FOR BULLETS.</div>
+
+    <div class="quest">
+
+      <div class="quest-entry active">
+        <div class="icon">!</div>
+        <div>
+          <div class="role">BACKEND SOFTWARE DEVELOPER <span class="badge-active">ACTIVE</span></div>
+          <div class="org">Alltrue.ai · Vancouver</div>
+          <div class="flavor">"Build the arena where LLMs get red-teamed before they ship."</div>
+          <ul>
+            <li>Backend owner on an <b style="color:var(--gold);">LLM pentesting / AI red-team platform</b> probing customer models against <b>OWASP LLM Top 10 &amp; MITRE ATLAS</b> attack patterns</li>
+            <li>Architected a <b>3-service redesign</b> of the eval pipeline — distributed batch workers, paginated REST + GraphQL APIs, SQLAlchemy ORM migration off raw SQL</li>
+            <li>Async <b>Redis-queue</b> pipelines with <b>exponential backoff + jitter</b> retry, race-condition hardening, multilingual attack coverage — no request timeouts on long-horizon evals</li>
+            <li>Shipped <b style="color:var(--gold);">30+ correctness fixes</b> across the stack; tightened error handling, authN, rate limiting, observability</li>
+            <li>Deployed on AWS ECS / Lambda / EventBridge / Bedrock; production use by clients worldwide</li>
+          </ul>
+          <span class="xp">IN PROGRESS · +XP ACCRUING</span>
+        </div>
+        <div class="date">MAR 2025<br/>—<br/>NOW</div>
+      </div>
+
+      <div class="quest-entry past">
+        <div class="icon">★</div>
+        <div>
+          <div class="role">PRO ESPORTS ATHLETE · TEAM CAPTAIN</div>
+          <div class="org">Evil Geniuses · Nouns · Team Canada</div>
+          <div class="flavor">"Lead a party of five across the competitive circuit."</div>
+          <ul>
+            <li>Captained rosters across three orgs under sustained high-pressure play</li>
+            <li>Leadership, ownership, split-second decision-making — on live stages</li>
+            <li>Turns out clutch rounds and on-call incidents use the same skill tree</li>
+          </ul>
+          <span class="xp" style="color:var(--magenta);">COMPLETED · +2,450 XP</span>
+        </div>
+        <div class="date">AUG 2022<br/>—<br/>MAR 2025</div>
+      </div>
+
+      <div class="quest-entry past">
+        <div class="icon">▲</div>
+        <div>
+          <div class="role">SOFTWARE DEVELOPER</div>
+          <div class="org">Imagia Canexia Health · Vancouver</div>
+          <div class="flavor">"Ship the artifact that labs worldwide will trust in diagnosis."</div>
+          <ul>
+            <li>Built and maintained software used worldwide for <b>cancer diagnosis</b></li>
+            <li>Bioinformatics pipeline observability + optimization: <b style="color:var(--gold);">-35% execution time</b></li>
+            <li>Portal web app rendering assay results as clinician-friendly PDFs</li>
+            <li>Full SDLC — design reviews, testing, deploy, prod support</li>
+          </ul>
+          <span class="xp" style="color:var(--purple);">COMPLETED · +4,800 XP</span>
+        </div>
+        <div class="date">JUN 2018<br/>—<br/>JAN 2023</div>
+      </div>
+
+      <div class="quest-entry past">
+        <div class="icon">◆</div>
+        <div>
+          <div class="role">SOFTWARE DEVELOPER</div>
+          <div class="org">Shah Lab · BC Cancer Research Centre</div>
+          <div class="flavor">"Move the terabytes. The research depends on it."</div>
+          <ul>
+            <li>Event-driven pipelines moving terabytes of genomics data across cloud + on-prem</li>
+            <li>Shipped alpha of a custom data-management platform (GUI + API)</li>
+            <li>Contributing author on a paper in <b>Cell</b></li>
+          </ul>
+          <span class="xp" style="color:var(--purple);">COMPLETED · +900 XP</span>
+        </div>
+        <div class="date">MAY 2017<br/>—<br/>DEC 2017</div>
+      </div>
+
+      <div class="quest-entry past">
+        <div class="icon">◇</div>
+        <div>
+          <div class="role">RESEARCH ASSISTANT</div>
+          <div class="org">Pio Lab · Simon Fraser University</div>
+          <div class="flavor">"Parse the data. Write the paper. Get published."</div>
+          <ul>
+            <li>R + Python scripts automating virtual screening &amp; downstream data parsing</li>
+            <li><b>Primary author</b> on a paper in <b style="color:var(--gold);">Nature Scientific Reports</b></li>
+          </ul>
+          <span class="xp" style="color:var(--purple);">COMPLETED · +600 XP</span>
+        </div>
+        <div class="date">MAY 2016<br/>—<br/>JUL 2016</div>
+      </div>
+
+    </div>
+
+    <!-- hidden coin #3 -->
+    <button class="coin-pickup" data-coin="3"
+      style="position:absolute;left:18px;bottom:18px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      title="shiny..." aria-label="hidden coin"></button>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 3: INVENTORY (projects) ======================== -->
+<!-- ===================================================================== -->
+<section class="scene" id="scene-inventory">
+  <div class="loc">
+    <div class="loc-head">
+      <div>
+        <div class="title">◆ THE SHOP</div>
+        <div class="sub">» INVENTORY.IDX  ·  4 ITEMS</div>
+      </div>
+      <button class="back-btn" data-loc="map">← WORLD MAP</button>
+    </div>
+
+    <div class="dialog" data-typewriter="inventory">
+      <div class="speaker">SHOPKEEPER</div>
+      <span class="content"></span>
+      <span class="caret">▼</span>
+    </div>
+
+    <div class="inv-hint">» <span class="hl">CLICK</span> A CRATE TO OPEN IT · <span class="hl">OPEN ALL</span> FOR A BONUS</div>
+
+    <div class="inv-grid" id="invGrid">
+
+      <article class="crate rarity-legendary" data-crate="1">
+        <div class="crate-closed">
+          <div class="crate-lid"></div>
+          <div class="rarity-tag">LEGENDARY</div>
+          <div class="crate-hint">► OPEN</div>
+        </div>
+        <div class="crate-content">
+          <div class="rarity" style="color:var(--gold);">★ LEGENDARY</div>
+          <h3>LLM PENTESTING PLATFORM</h3>
+          <p>AI red-team platform probing customer LLMs against <b>OWASP LLM Top 10</b> + <b>MITRE ATLAS</b> attack patterns. 3-service redesign, distributed batch workers, async Redis queues with exponential-backoff-&amp;-jitter retry. Shipped 30+ correctness fixes; multilingual coverage.</p>
+          <div class="tags">
+            <span class="tag">Python</span><span class="tag">Redis</span>
+            <span class="tag">SQLAlchemy</span><span class="tag">AWS</span>
+            <span class="tag">Bedrock</span><span class="tag">OWASP</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="crate rarity-epic" data-crate="2">
+        <div class="crate-closed">
+          <div class="crate-lid"></div>
+          <div class="rarity-tag">EPIC</div>
+          <div class="crate-hint">► OPEN</div>
+        </div>
+        <div class="crate-content">
+          <div class="rarity" style="color:var(--magenta);">◆ EPIC</div>
+          <h3>CLINICAL ASSAY PORTAL</h3>
+          <p>Web app rendering cancer-diagnostics assay results as clinician-friendly PDFs. Ran in production for labs worldwide.</p>
+          <div class="tags">
+            <span class="tag">Python</span><span class="tag">Postgres</span><span class="tag">PDF</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="crate rarity-epic" data-crate="3">
+        <div class="crate-closed">
+          <div class="crate-lid"></div>
+          <div class="rarity-tag">EPIC</div>
+          <div class="crate-hint">► OPEN</div>
+        </div>
+        <div class="crate-content">
+          <div class="rarity" style="color:var(--magenta);">◆ EPIC</div>
+          <h3>BIOINFO PIPELINE OPTIMIZER</h3>
+          <p>Profiled and optimized hot paths in production bioinformatics pipelines. Cut average execution time by 35%.</p>
+          <div class="tags">
+            <span class="tag">Python</span><span class="tag">Profiling</span><span class="tag">Obs.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="crate rarity-rare" data-crate="4">
+        <div class="crate-closed">
+          <div class="crate-lid"></div>
+          <div class="rarity-tag">RARE</div>
+          <div class="crate-hint">► OPEN</div>
+        </div>
+        <div class="crate-content">
+          <div class="rarity" style="color:var(--cyan);">◈ RARE</div>
+          <h3>RESEARCH DATA ORCHESTRATOR</h3>
+          <p>Event-driven platform moving terabytes of genomics data across on-prem + cloud. GUI + API. Shipped alpha at Shah Lab.</p>
+          <div class="tags">
+            <span class="tag">Python</span><span class="tag">Event-dr</span><span class="tag">GUI</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="inv-footer">
+      → more items at <a href="https://github.com/JessicaNgo" target="_blank" rel="noopener">github.com/JessicaNgo</a>
+    </div>
+
+    <!-- hidden coin #4 -->
+    <button class="coin-pickup" data-coin="4"
+      style="position:absolute;right:20px;top:70px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      title="shiny..." aria-label="hidden coin"></button>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 4: TROPHY HALL (esports) ======================= -->
+<!-- ===================================================================== -->
+<section class="scene" id="scene-trophy">
+  <div class="loc" style="border-color:var(--magenta);box-shadow:0 0 0 4px var(--bg), 0 0 0 6px var(--magenta);">
+    <div class="loc-head" style="border-bottom-color:var(--magenta);">
+      <div>
+        <div class="title" style="color:var(--magenta);">◆ THE TROPHY HALL</div>
+        <div class="sub" style="color:var(--gold);">» SECRET AREA DISCOVERED</div>
+      </div>
+      <button class="back-btn" data-loc="map">← WORLD MAP</button>
+    </div>
+
+    <div class="dialog" data-typewriter="trophy" style="border-color:var(--magenta);">
+      <div class="speaker" style="color:var(--magenta);">TEAM CAPTAIN</div>
+      <span class="content"></span>
+      <span class="caret">▼</span>
+    </div>
+
+    <div class="trophy-banner">
+      <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:var(--gold);text-shadow:3px 3px 0 #1a0a00;margin-bottom:6px;">
+        PROFESSIONAL COUNTER-STRIKE
+      </div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--magenta);letter-spacing:2px;margin-bottom:14px;">
+        2022 – 2025  ·  TEAM CAPTAIN  ·  NA / INTL CIRCUIT
+      </div>
+      <p style="font-size:20px;color:var(--text);">
+        Two and a half years as a paid esports athlete, captaining rosters across three orgs.
+        Drafted playbooks, called mid-round adjustments, debugged team chemistry under
+        tournament pressure. If you've ever shipped a fix at 2 a.m. with a crowd watching —
+        we use the same skill tree.
+      </p>
+
+      <div class="trophy-grid">
+        <div class="trophy-card">
+          <div class="medal">1</div>
+          <div class="team">EVIL GENIUSES</div>
+          <div class="yr">SEATTLE · 2023–24</div>
+          <div class="note">Tier-1 NA roster.<br/>Captain.</div>
+        </div>
+        <div class="trophy-card">
+          <div class="medal">2</div>
+          <div class="team">NOUNS</div>
+          <div class="yr">REMOTE · 2024–25</div>
+          <div class="note">Community-backed org.<br/>IGL / Captain.</div>
+        </div>
+        <div class="trophy-card">
+          <div class="medal">★</div>
+          <div class="team">TEAM CANADA</div>
+          <div class="yr">NATIONAL · 2022–25</div>
+          <div class="note">Represented Canada internationally.</div>
+        </div>
+      </div>
+
+      <div class="trophy-cta">
+        <a href="https://www.hltv.org/player/21794/jesscas" target="_blank" rel="noopener">
+          ▶ FULL MATCH HISTORY @ HLTV.ORG
+        </a>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;text-align:center;">
+      » PSST — TRY THE KONAMI CODE FOR AN IN-GAME VIEW
+    </div>
+
+    <!-- hidden coin #5 -->
+    <button class="coin-pickup" data-coin="5"
+      style="position:absolute;left:22px;top:80px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      title="shiny..." aria-label="hidden coin"></button>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ================ SCENE 5: TAVERN (contact) ============================ -->
+<!-- ===================================================================== -->
+<section class="scene" id="scene-tavern">
+  <div class="loc">
+    <div class="loc-head">
+      <div>
+        <div class="title">◆ THE TAVERN</div>
+        <div class="sub">» CONTACT.TXT  ·  PARTY HALL</div>
+      </div>
+      <button class="back-btn" data-loc="map">← WORLD MAP</button>
+    </div>
+
+    <div class="dialog" data-typewriter="tavern">
+      <div class="speaker">BARKEEP</div>
+      <span class="content"></span>
+      <span class="caret">▼</span>
+    </div>
+
+    <div class="party">
+      <a class="member" href="/cdn-cgi/l/email-protection#94fef1e7e7fdf7f5bafaf3fbd4f8fde2f1baf7fbf9">
+        <div class="avatar">@</div>
+        <div><div class="label">EMAIL · BEST</div><div class="handle"><span class="__cf_email__" data-cfemail="e68c8395958f8587c8888189a68a8f9083c885898b">[email&#160;protected]</span></div></div>
+      </a>
+      <a class="member" href="https://github.com/JessicaNgo" target="_blank" rel="noopener">
+        <div class="avatar">&gt;</div>
+        <div><div class="label">GITHUB</div><div class="handle">JessicaNgo</div></div>
+      </a>
+      <a class="member" href="https://www.linkedin.com/in/ngojessica/" target="_blank" rel="noopener">
+        <div class="avatar">in</div>
+        <div><div class="label">LINKEDIN</div><div class="handle">ngojessica</div></div>
+      </a>
+      <a class="member" href="https://x.com/jesscas_cs" target="_blank" rel="noopener">
+        <div class="avatar">x</div>
+        <div><div class="label">TWITTER / X</div><div class="handle">@jesscas_cs</div></div>
+      </a>
+      <a class="member" href="https://www.hltv.org/player/21794/jesscas" target="_blank" rel="noopener">
+        <div class="avatar">♜</div>
+        <div><div class="label">HLTV</div><div class="handle">jesscas</div></div>
+      </a>
+      <a class="member" href="assets/resume.pdf" download>
+        <div class="avatar">↓</div>
+        <div><div class="label">RESUME</div><div class="handle">resume.pdf</div></div>
+      </a>
+    </div>
+
+    <div class="tavern-note">
+      <b>» PINNED TO THE WALL:</b> Currently open to
+      <span style="color:var(--mint);">senior backend</span>,
+      <span style="color:var(--mint);">infra</span>, and
+      <span style="color:var(--mint);">AI-safety</span> roles.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ======================================================================= -->
+<!-- ==================  CLEAN VIEW (recruiter-friendly)  ================== -->
+<!-- ======================================================================= -->
+<section id="clean-view" aria-label="Recruiter-friendly view">
+
+  <header class="cv-header">
+    <div class="cv-name">JESSICA NGO</div>
+    <div class="cv-title">Senior Backend Engineer &nbsp;·&nbsp; AI safety infra, async pipelines, LLM red-teaming.</div>
+    <div class="cv-meta">Vancouver, BC &nbsp;·&nbsp; ~9 years engineering &nbsp;·&nbsp; Open to senior backend / infra / AI-safety roles.</div>
+    <nav class="cv-links">
+      <a href="/cdn-cgi/l/email-protection#e68c8395958f8587c8888189a68a8f9083c885898b"><span class="__cf_email__" data-cfemail="88e2ede5e5ffeee1ae88ebe0fbe6fde5e8fb">[email&#160;protected]</span></a>
+      <a href="https://github.com/JessicaNgo" target="_blank" rel="noopener">github.com/JessicaNgo</a>
+      <a href="https://www.linkedin.com/in/ngojessica/" target="_blank" rel="noopener">linkedin.com/in/ngojessica</a>
+      <a href="https://x.com/jesscas_cs" target="_blank" rel="noopener">x.com/jesscas_cs</a>
+      <a href="https://www.hltv.org/player/21794/jesscas" target="_blank" rel="noopener">hltv.org/player/21794/jesscas</a>
+      <a href="assets/resume.pdf" download>resume.pdf ↓</a>
+    </nav>
+  </header>
+
+  <h2>// SUMMARY</h2>
+  <p class="cv-summary">
+    Senior backend engineer based in Vancouver. Currently building an
+    <b>LLM pentesting / AI red-team platform</b> at Alltrue.ai — distributed batch pipelines,
+    async Redis queues, retry &amp; race-condition hardening, probing customer models against
+    OWASP LLM Top 10 and MITRE ATLAS attack patterns. Before that, five years shipping
+    bioinformatics software used worldwide in cancer diagnosis. Published contributing author
+    in <b>Cell</b>, primary author in <b>Nature Scientific Reports</b>. Also the part you'll
+    remember: 2.5 years (2022–2025) as a professional Counter-Strike player and team captain
+    for Evil Geniuses, Nouns, and Team Canada. Gamer + builder, all in one.
+  </p>
+
+  <h2>// EXPERIENCE</h2>
+
+  <div class="cv-job">
+    <div class="cv-job-head">
+      <span class="cv-role">Backend Software Developer</span>
+      <span class="cv-date">Mar 2025 – Present</span>
+    </div>
+    <div class="cv-org">Alltrue.ai · Vancouver, BC</div>
+    <ul>
+      <li>Backend owner on an <b>LLM pentesting / AI red-team platform</b> probing customer models against <b>OWASP LLM Top 10</b> and <b>MITRE ATLAS</b> attack patterns; shipped to clients worldwide.</li>
+      <li>Architected a <b>3-service redesign</b> of the eval pipeline — distributed batch workers, paginated REST + GraphQL APIs, migration from raw SQL to SQLAlchemy ORM.</li>
+      <li>Async <b>Redis-queue</b> pipelines with <b>exponential backoff + jitter</b> retry, race-condition hardening, and multilingual attack coverage — long-horizon evals run without request timeouts.</li>
+      <li>Shipped <b>30+ correctness fixes</b> across the stack; tightened error handling, authN, rate limiting, and observability.</li>
+      <li>AWS ECS / Lambda / EventBridge / Bedrock with monitoring &amp; alerting.</li>
+    </ul>
+  </div>
+
+  <div class="cv-job">
+    <div class="cv-job-head">
+      <span class="cv-role">Professional Esports Athlete · Team Captain</span>
+      <span class="cv-date">Aug 2022 – Mar 2025</span>
+    </div>
+    <div class="cv-org">Evil Geniuses · Nouns · Team Canada</div>
+    <ul>
+      <li>Paid esports athlete (Counter-Strike) captaining rosters across three organizations under sustained high-pressure competitive play.</li>
+      <li>Leadership, ownership, split-second decision-making, and on-stage communication — on live international stages.</li>
+      <li>Clutch rounds and on-call incidents use the same skill tree.</li>
+    </ul>
+  </div>
+
+  <div class="cv-job">
+    <div class="cv-job-head">
+      <span class="cv-role">Software Developer</span>
+      <span class="cv-date">Jun 2018 – Jan 2023</span>
+    </div>
+    <div class="cv-org">Imagia Canexia Health · Vancouver, BC</div>
+    <ul>
+      <li>Built and maintained backend software used worldwide for <b>cancer diagnosis</b>.</li>
+      <li>Bioinformatics pipeline observability + optimization — <b>-35% execution time</b>.</li>
+      <li>Clinician-facing portal rendering assay results as PDF reports.</li>
+      <li>Full SDLC ownership: design reviews, testing, deployment, production support.</li>
+    </ul>
+  </div>
+
+  <div class="cv-job">
+    <div class="cv-job-head">
+      <span class="cv-role">Software Developer</span>
+      <span class="cv-date">May 2017 – Dec 2017</span>
+    </div>
+    <div class="cv-org">Shah Lab · BC Cancer Research Centre</div>
+    <ul>
+      <li>Event-driven pipelines moving terabytes of genomics data across cloud and on-prem.</li>
+      <li>Shipped alpha of a custom data-management platform (GUI + API).</li>
+      <li>Contributing author on a paper in <b>Cell</b>.</li>
+    </ul>
+  </div>
+
+  <div class="cv-job">
+    <div class="cv-job-head">
+      <span class="cv-role">Research Assistant</span>
+      <span class="cv-date">May 2016 – Jul 2016</span>
+    </div>
+    <div class="cv-org">Pio Lab · Simon Fraser University</div>
+    <ul>
+      <li>R and Python scripts automating virtual drug screening &amp; downstream data parsing.</li>
+      <li><b>Primary author</b> on a paper in <b>Nature Scientific Reports</b>.</li>
+    </ul>
+  </div>
+
+  <h2>// SELECTED PROJECTS</h2>
+  <div class="cv-grid">
+    <div class="cv-proj">
+      <h3>LLM PENTESTING PLATFORM</h3>
+      <p>AI red-team platform probing customer LLMs against OWASP LLM Top 10 + MITRE ATLAS attack patterns. 3-service redesign, distributed batch workers, async Redis queues with exponential-backoff-&amp;-jitter retry. Shipped 30+ correctness fixes; multilingual coverage.</p>
+      <div class="cv-tags">Python · Redis · SQLAlchemy · AWS · Bedrock · OWASP</div>
+    </div>
+    <div class="cv-proj">
+      <h3>CLINICAL ASSAY PORTAL</h3>
+      <p>Web application rendering cancer-diagnostics assay results as clinician-friendly PDFs. Ran in production for labs worldwide.</p>
+      <div class="cv-tags">Python · Django · PostgreSQL · PDF</div>
+    </div>
+    <div class="cv-proj">
+      <h3>BIOINFORMATICS PIPELINE OPS</h3>
+      <p>Observability + optimization layer on a production bioinformatics pipeline. -35% execution time end-to-end.</p>
+      <div class="cv-tags">Python · AWS · Observability</div>
+    </div>
+    <div class="cv-proj">
+      <h3>GENOMICS DATA PLATFORM (α)</h3>
+      <p>Event-driven pipelines moving terabytes of genomics data across cloud + on-prem. Shipped alpha of a custom data-management platform with GUI + API.</p>
+      <div class="cv-tags">Python · Event-driven · Hybrid cloud</div>
+    </div>
+  </div>
+
+  <h2>// ESPORTS</h2>
+  <div class="cv-teams">
+    <div class="cv-team">
+      <div class="cv-team-name">Evil Geniuses</div>
+      <div class="cv-team-yr">Seattle · 2023–24</div>
+      <div class="cv-team-note">Tier-1 NA roster. Captain.</div>
+    </div>
+    <div class="cv-team">
+      <div class="cv-team-name">Nouns Esports</div>
+      <div class="cv-team-yr">Remote · 2024–25</div>
+      <div class="cv-team-note">Community-backed org. IGL / Captain.</div>
+    </div>
+    <div class="cv-team">
+      <div class="cv-team-name">Team Canada</div>
+      <div class="cv-team-yr">National · 2022–25</div>
+      <div class="cv-team-note">Represented Canada at international events.</div>
+    </div>
+  </div>
+  <p class="cv-esports-note">
+    Full match history on HLTV:
+    <a href="https://www.hltv.org/player/21794/jesscas" target="_blank" rel="noopener" style="color:var(--cyan);border-bottom:1px dotted rgba(125,216,255,0.5);">hltv.org/player/21794/jesscas</a>.
+  </p>
+
+  <h2>// PUBLICATIONS</h2>
+  <ul class="cv-pubs">
+    <li>Contributing author · <b>Cell</b> — single-cell genomics work with Shah Lab (BC Cancer).</li>
+    <li>Primary author · <b>Nature Scientific Reports</b> — computational drug-screening work with Pio Lab (SFU).</li>
+  </ul>
+
+  <footer class="cv-foot">
+    <span>Jessica Ngo · Vancouver, BC · April 2026</span>
+    <span><a href="?view=arcade#map">← back to the arcade</a></span>
+  </footer>
+</section>
+
+<!-- ========== ACHIEVEMENT TOAST STACK ========== -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ========== MINI TERMINAL ========== -->
+<div class="miniterm-overlay" id="miniterm">
+  <div class="miniterm">
+    <div class="tbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="path">jessica@portfolio:~ — summoned</span>
+      <button class="close" id="mtClose">×</button>
+    </div>
+    <div class="body" id="mtBody">
+      <p><span class="muted">Type</span> <span class="kw">help</span> <span class="muted">for a list of commands. </span><span class="muted">Press</span> <kbd style="color:#f2cc60;">esc</kbd> <span class="muted">to close.</span></p>
+    </div>
+    <div class="input-row">
+      <span class="prompt">jessica@portfolio</span><span>:</span><span class="dir">~</span><span>$&nbsp;</span>
+      <input id="mtInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="try: help · whoami · ls · hire · rush b · gg" />
+    </div>
+  </div>
+</div>
+
+<!-- ========== CS2 HUD (Konami) ========== -->
+<div class="cs2-overlay" id="cs2Overlay">
+  <div class="cs2-panel">
+    <button class="cs2-close" id="cs2Close">× CLOSE</button>
+    <div class="cs2-top">
+      <div class="cs2-team ct">CT · TEAM NGO</div>
+      <div class="cs2-score">13 — 9</div>
+      <div class="cs2-timer">01:12</div>
+      <div class="cs2-team t">T · RECRUITERS</div>
+    </div>
+    <div class="cs2-body">
+      <div class="cs2-title">→ KONAMI CODE ACCEPTED</div>
+      <ul class="cs2-log">
+        <li><span class="killer">jesscas</span> <span class="wep">[ak47]</span> <span class="victim">impostor_syndrome</span> <span class="hl">hs</span></li>
+        <li><span class="killer">jesscas</span> <span class="wep">[deagle]</span> <span class="victim">on_call_pager</span></li>
+        <li><span class="killer">jesscas</span> <span class="wep">[awp]</span> <span class="victim">p99_latency</span> <span class="hl">wallbang</span></li>
+        <li><span class="killer">jesscas</span> <span class="wep">[knife]</span> <span class="victim">flaky_test</span> <span class="hl">ace</span></li>
+        <li><span class="killer">jesscas</span> <span class="wep">[redis]</span> <span class="victim">request_timeout</span> <span class="hl">clutch 1v4</span></li>
+      </ul>
+      <div class="cs2-hint">
+        rosters: Evil Geniuses (2023–24) · Nouns (2024–25) · Team Canada (2022–25).<br/>
+        match history: <a href="https://www.hltv.org/player/21794/jesscas" target="_blank" style="color:#7cc5ff;">hltv.org/player/21794/jesscas</a> · press <kbd>esc</kbd> to close.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scanlines"></div>
+<div class="hint-strip">
+  <span class="k">0</span> MAP · <span class="k">1-5</span> TRAVEL · <span class="k">/</span> TERM · <span class="k">?</span> HELP
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(() => {
+  // ==================================================================
+  //  Starfield generation
+  // ==================================================================
+  function genStars(el, count, size, color) {
+    const pts = [];
+    for (let i = 0; i < count; i++) {
+      const x = Math.floor(Math.random() * 100);
+      const y = Math.floor(Math.random() * 200);
+      pts.push(`${x}vw ${y}vh 0 ${color}`);
+    }
+    el.style.boxShadow = pts.join(',');
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.background = 'transparent';
+    el.style.position = 'fixed';
+    el.style.top = '-10px'; el.style.left = '0';
+  }
+  genStars(document.getElementById('stars1'), 60, 2, '#e8e6d4');
+  genStars(document.getElementById('stars2'), 40, 1, '#9d94f0');
+  genStars(document.getElementById('stars3'), 25, 3, '#f7d51d');
+
+  // ==================================================================
+  //  Scene routing
+  // ==================================================================
+  const scenes = {
+    map:           { el: document.getElementById('scene-map'),         label: 'WORLD MAP' },
+    archives:      { el: document.getElementById('scene-archives'),    label: 'ARCHIVES' },
+    'quest-board': { el: document.getElementById('scene-quest-board'), label: 'QUEST BOARD' },
+    inventory:     { el: document.getElementById('scene-inventory'),   label: 'SHOP' },
+    trophy:        { el: document.getElementById('scene-trophy'),      label: 'TROPHY HALL' },
+    tavern:        { el: document.getElementById('scene-tavern'),      label: 'TAVERN' },
+  };
+  const locToKey = { 'map':'0','archives':'1','quest-board':'2','inventory':'3','trophy':'4','tavern':'5' };
+  const pinPos = {
+    archives:   { left: '38%', top: '30%' },
+    'quest-board': { left: '23%', top: '68%' },
+    inventory:  { left: '72%', top: '32%' },
+    trophy:     { left: '82%', top: '18%' },
+    tavern:     { left: '82%', top: '70%' },
+    map:        { left: '50%', top: '58%' },
+  };
+  const topLoc = document.getElementById('topLoc');
+  const avatarMap = document.getElementById('mapAvatar');
+
+  const visited = new Set(JSON.parse(localStorage.getItem('jn_visited') || '[]'));
+  function markVisited(loc) {
+    if (loc === 'map') return;
+    visited.add(loc);
+    localStorage.setItem('jn_visited', JSON.stringify([...visited]));
+    document.querySelectorAll(`.pin[data-loc="${loc}"]`).forEach(p => p.classList.add('visited'));
+  }
+  visited.forEach(loc => {
+    document.querySelectorAll(`.pin[data-loc="${loc}"]`).forEach(p => p.classList.add('visited'));
+  });
+
+  function go(loc, opts = {}) {
+    if (!scenes[loc]) loc = 'map';
+    Object.values(scenes).forEach(s => s.el.classList.remove('active'));
+    scenes[loc].el.classList.add('active');
+    topLoc.textContent = scenes[loc].label;
+    // move map avatar
+    if (pinPos[loc]) {
+      avatarMap.style.left = pinPos[loc].left;
+      avatarMap.style.top  = pinPos[loc].top;
+    }
+    // update hash
+    const hash = loc === 'map' ? '' : '#' + loc;
+    if (!opts.replace) history.pushState({loc}, '', hash || location.pathname);
+    else history.replaceState({loc}, '', hash || location.pathname);
+
+    // typewriter on each entry
+    if (loc !== 'map') {
+      runTypewriter(scenes[loc].el.querySelector('.dialog[data-typewriter]'));
+      markVisited(loc);
+      // achievement for visiting
+      achievementFor('visit:' + loc, achLabels[loc] || loc);
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function fromHash() {
+    const h = location.hash.replace('#','') || 'map';
+    return scenes[h] ? h : 'map';
+  }
+  go(fromHash(), { replace: true });
+  window.addEventListener('hashchange', () => go(fromHash(), { replace: true }));
+
+  // Wire nav
+  document.addEventListener('click', (e) => {
+    const loc = e.target.closest('[data-loc]');
+    if (loc) {
+      e.preventDefault();
+      go(loc.dataset.loc);
+    }
+  });
+
+  // Keys
+  const keyMap = {'0':'map','1':'archives','2':'quest-board','3':'inventory','4':'trophy','5':'tavern'};
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    // Clean view: don't hijack keys; it's a plain document
+    if (document.body.classList.contains('clean-mode')) return;
+    if (keyMap[e.key] !== undefined) {
+      e.preventDefault();
+      go(keyMap[e.key]);
+    } else if (e.key === 'Escape') {
+      // handled per-overlay; fallback to map
+      if (!document.getElementById('miniterm').classList.contains('on')
+       && !document.getElementById('cs2Overlay').classList.contains('on')) {
+        go('map');
+      }
+    } else if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+      // skip
+    } else if (e.key === '/') {
+      e.preventDefault();
+      openTerminal();
+    } else if (e.key.toLowerCase() === 'h') {
+      go('map');
+    }
+  });
+
+  // ==================================================================
+  //  Typewriter dialogue
+  // ==================================================================
+  const dialogues = {
+    archives: `Hi — I'm <span class="hl">Jessica</span>. Senior backend engineer. I build the <span class="kw">async pipelines</span> that <span class="hot">red-team LLMs</span> against OWASP &amp; MITRE ATLAS before they ship. Click around — or use number keys.`,
+    quest: `Five quests on the board. The top one is <span class="hl">ACTIVE</span>; the others are <span class="kw">COMPLETED</span>. Notice anything familiar about quest #2?`,
+    inventory: `Welcome to the shop. Everything's crafted and <span class="kw">already shipped</span>. Click a crate to inspect it — open all four for a little bonus.`,
+    trophy: `You found the <span class="hot">secret area</span>. Yes, the HLTV profile is real. Clutch rounds and on-call incidents use the same skill tree.`,
+    tavern: `Take a seat. Best way to reach the hero is <span class="hl">email</span> — the rest are there for due diligence. gg &amp; hit me up.`,
+  };
+  const achLabels = {
+    archives: 'Read the Profile',
+    'quest-board': 'Checked the Board',
+    inventory: 'Browsed the Shop',
+    trophy: 'Found the Secret Area',
+    tavern: 'Visited the Tavern',
+  };
+  const typewriterState = new WeakMap();
+  function runTypewriter(dlg) {
+    if (!dlg) return;
+    const key = dlg.dataset.typewriter;
+    const text = dialogues[key];
+    const content = dlg.querySelector('.content');
+    if (typewriterState.get(dlg)) { // already done; just restore
+      content.innerHTML = text;
+      dlg.classList.add('done');
+      return;
+    }
+    content.innerHTML = '';
+    dlg.classList.remove('done');
+    // type char-by-char but preserve HTML spans
+    let i = 0;
+    const container = document.createElement('span');
+    content.appendChild(container);
+    const tmp = document.createElement('div');
+    tmp.innerHTML = text;
+    const flatNodes = [];
+    function walk(node, cls) {
+      if (node.nodeType === 3) {
+        for (const ch of node.textContent) flatNodes.push({ch, cls});
+      } else if (node.nodeType === 1) {
+        const newCls = node.className || cls || '';
+        for (const child of node.childNodes) walk(child, newCls);
+      }
+    }
+    walk(tmp, '');
+    let tickTimer;
+    function tick() {
+      if (i >= flatNodes.length) {
+        dlg.classList.add('done');
+        typewriterState.set(dlg, true);
+        return;
+      }
+      const {ch, cls} = flatNodes[i++];
+      if (cls) {
+        const span = document.createElement('span');
+        span.className = cls;
+        span.textContent = ch;
+        container.appendChild(span);
+      } else {
+        container.appendChild(document.createTextNode(ch));
+      }
+      tickTimer = setTimeout(tick, ch === ' ' ? 12 : 18);
+    }
+    tick();
+    // click to skip
+    dlg.onclick = () => {
+      clearTimeout(tickTimer);
+      content.innerHTML = text;
+      dlg.classList.add('done');
+      typewriterState.set(dlg, true);
+    };
+  }
+
+  // ==================================================================
+  //  Sprite animation (blink + occasional type)
+  // ==================================================================
+  function animateSprite() {
+    const sprite = document.getElementById('heroSprite');
+    if (!sprite) return;
+    const eyes = sprite.querySelectorAll('.eye');
+    const armL = sprite.querySelector('.arm-l');
+    const armR = sprite.querySelector('.arm-r');
+
+    // blink loop
+    function blink() {
+      eyes.forEach(e => e.setAttribute('height', '0.3'));
+      setTimeout(() => eyes.forEach(e => e.setAttribute('height', '1')), 120);
+      setTimeout(blink, 2500 + Math.random() * 4000);
+    }
+    blink();
+
+    // type loop
+    function type() {
+      let n = 0;
+      const step = () => {
+        if (n % 2 === 0) {
+          armL.setAttribute('y', '11');
+          armR.setAttribute('y', '10');
+        } else {
+          armL.setAttribute('y', '10');
+          armR.setAttribute('y', '11');
+        }
+        n++;
+        if (n < 8) setTimeout(step, 140);
+        else {
+          armL.setAttribute('y', '10');
+          armR.setAttribute('y', '10');
+          setTimeout(type, 4000 + Math.random() * 5000);
+        }
+      };
+      step();
+    }
+    setTimeout(type, 1800);
+
+    // idle bob
+    sprite.parentElement.style.animation = 'bob 1.4s steps(2) infinite';
+  }
+  animateSprite();
+
+  // ==================================================================
+  //  Crates (loot boxes)
+  // ==================================================================
+  document.querySelectorAll('.crate').forEach(c => {
+    c.addEventListener('click', () => {
+      if (c.classList.contains('open')) return;
+      c.classList.add('shake-once');
+      setTimeout(() => {
+        c.classList.remove('shake-once');
+        c.classList.add('open');
+        const allOpen = [...document.querySelectorAll('.crate')].every(x => x.classList.contains('open'));
+        if (allOpen) {
+          achievementFor('allcrates', 'Opened all 4 crates');
+        }
+      }, 260);
+    });
+  });
+
+  // ==================================================================
+  //  Achievements / toasts
+  // ==================================================================
+  const earned = new Set(JSON.parse(localStorage.getItem('jn_ach') || '[]'));
+  const toastStack = document.getElementById('toastStack');
+  function achievement(id, name, xp = 10) {
+    if (earned.has(id)) return;
+    earned.add(id);
+    localStorage.setItem('jn_ach', JSON.stringify([...earned]));
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<div class="hdr">ACHIEVEMENT UNLOCKED</div>
+                   <div class="name">${name}</div>
+                   <div class="xp">+${xp} XP</div>`;
+    toastStack.appendChild(t);
+    setTimeout(() => t.remove(), 4200);
+  }
+  function achievementFor(id, name) {
+    achievement(id, name);
+  }
+  // expose for inline handlers
+  window.__ach = achievement;
+
+  // Resume download achievement
+  document.querySelectorAll('[data-achievement="fineprint"]').forEach(el => {
+    el.addEventListener('click', () => achievement('resume', 'Read the Fine Print', 50));
+  });
+
+  // ==================================================================
+  //  Hidden coins
+  // ==================================================================
+  const foundCoins = new Set(JSON.parse(localStorage.getItem('jn_coins') || '[]'));
+  const coinCount = document.getElementById('coinCount');
+  function updateCoinCount() { coinCount.textContent = foundCoins.size; }
+  document.querySelectorAll('.coin-pickup').forEach(coin => {
+    const id = coin.dataset.coin;
+    if (foundCoins.has(id)) coin.remove();
+    coin.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (foundCoins.has(id)) return;
+      foundCoins.add(id);
+      localStorage.setItem('jn_coins', JSON.stringify([...foundCoins]));
+      updateCoinCount();
+      // little sparkle: animate the coin away
+      coin.style.transition = 'transform .4s, opacity .4s';
+      coin.style.transform = 'translateY(-40px) scale(1.6)';
+      coin.style.opacity = '0';
+      setTimeout(() => coin.remove(), 420);
+      achievement('coin' + id, `Found Coin #${id}`, 25);
+      if (foundCoins.size === 5) {
+        setTimeout(() => achievement('allcoins', 'Completionist (5/5)', 500), 500);
+      }
+    });
+  });
+  updateCoinCount();
+
+  // ==================================================================
+  //  Mini-terminal (/ key)
+  // ==================================================================
+  const mt = document.getElementById('miniterm');
+  const mtBody = document.getElementById('mtBody');
+  const mtInput = document.getElementById('mtInput');
+  function openTerminal() {
+    mt.classList.add('on');
+    setTimeout(() => mtInput.focus(), 50);
+    achievement('findterm', 'Found the Hidden Terminal', 30);
+  }
+  function closeTerminal() { mt.classList.remove('on'); }
+  document.getElementById('mtClose').addEventListener('click', closeTerminal);
+  mt.addEventListener('click', (e) => { if (e.target === mt) closeTerminal(); });
+
+  const tcmds = {
+    help: () => `available: <span class="kw">help</span>, <span class="kw">whoami</span>, <span class="kw">ls</span>, <span class="kw">about</span>, <span class="kw">work</span>, <span class="kw">projects</span>, <span class="kw">esports</span>, <span class="kw">hire</span>, <span class="kw">rush b</span>, <span class="kw">gg</span>, <span class="kw">konami</span>, <span class="kw">clear</span>, <span class="kw">exit</span>`,
+    whoami: () => `jessica ngo — senior backend engineer · ex-pro CS player · vancouver`,
+    ls: () => `archives/  quest-board/  inventory/  trophy-hall/  tavern/  resume.pdf  fragmovie.mp4`,
+    about: () => { go('archives'); return `<span class="ok">→ traveling to archives</span>`; },
+    work: () => { go('quest-board'); return `<span class="ok">→ traveling to quest board</span>`; },
+    projects: () => { go('inventory'); return `<span class="ok">→ traveling to shop</span>`; },
+    esports: () => { go('trophy'); return `<span class="ok">→ traveling to trophy hall</span>`; },
+    contact: () => { go('tavern'); return `<span class="ok">→ traveling to tavern</span>`; },
+    hire: () => { location.href = 'mailto:jessica.ngo@live.com'; return `<span class="ok">opening mailto:jessica.ngo@live.com ...</span>`; },
+    gg: () => `<span class="hot">gg wp. dm me.</span>`,
+    'rush b': () => { achievement('rushb', 'Rushed B', 15); return `<span class="warn">rushing b — 4 flashes, 2 smokes.</span> <span class="muted">(easter egg found)</span>`; },
+    konami: () => `<span class="muted">try it on the keyboard:</span> ↑ ↑ ↓ ↓ ← → ← → b a`,
+    clear: () => { mtBody.innerHTML = ''; return null; },
+    exit: () => { closeTerminal(); return null; },
+  };
+  mtInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeTerminal(); return; }
+    if (e.key !== 'Enter') return;
+    const raw = mtInput.value.trim().toLowerCase();
+    if (!raw) return;
+    const echo = document.createElement('p');
+    echo.innerHTML = `<span class="prompt">jessica@portfolio</span>:<span class="dir">~</span>$ ${raw}`;
+    mtBody.appendChild(echo);
+    const fn = tcmds[raw];
+    if (fn) {
+      const out = fn();
+      if (out) {
+        const r = document.createElement('p');
+        r.innerHTML = out;
+        mtBody.appendChild(r);
+      }
+    } else {
+      const r = document.createElement('p');
+      r.innerHTML = `<span class="muted">zsh: command not found: ${raw} — try <span class="kw">help</span></span>`;
+      mtBody.appendChild(r);
+    }
+    mtInput.value = '';
+    mtBody.scrollTop = mtBody.scrollHeight;
+  });
+
+  // ==================================================================
+  //  Konami code → CS2 HUD
+  // ==================================================================
+  const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let kIdx = 0;
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea')) return;
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (key === konami[kIdx]) {
+      kIdx++;
+      if (kIdx === konami.length) {
+        openCS2();
+        kIdx = 0;
+      }
+    } else {
+      kIdx = (key === konami[0]) ? 1 : 0;
+    }
+  });
+  const cs2 = document.getElementById('cs2Overlay');
+  function openCS2() { cs2.classList.add('on'); achievement('konami', 'Entered the Konami Code', 100); }
+  function closeCS2() { cs2.classList.remove('on'); }
+  document.getElementById('cs2Close').addEventListener('click', closeCS2);
+  cs2.addEventListener('click', (e) => { if (e.target === cs2) closeCS2(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && cs2.classList.contains('on')) closeCS2();
+  });
+
+  // ==================================================================
+  //  Sound toggle (stub — off by default, just stored for now)
+  // ==================================================================
+  const soundBtn = document.getElementById('soundBtn');
+  let soundOn = false;
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.classList.toggle('on', soundOn);
+    soundBtn.textContent = soundOn ? 'SFX ON' : 'SFX OFF';
+  });
+
+  // Welcome achievement on first visit to map
+  setTimeout(() => achievement('start', 'Press Start', 5), 400);
+
+  // ==================================================================
+  //  Theme toggle (light ↔ dark)
+  //  Priority: ?theme= URL param > localStorage > prefers-color-scheme.
+  //  Button swaps between sun ☀ (currently dark, click for light) and
+  //  moon ☾ (currently light, click for dark). Persists to localStorage
+  //  so repeat visitors keep their pick.
+  // ==================================================================
+  const themeBtn = document.getElementById('themeToggle');
+  const LS_KEY = 'jn-theme';
+  function applyTheme(theme) {
+    const light = theme === 'light';
+    document.body.classList.toggle('light-theme', light);
+    themeBtn.textContent = light ? '☾' : '☀';
+    themeBtn.setAttribute('aria-pressed', String(light));
+    themeBtn.title = light ? 'Switch to dark' : 'Switch to light';
+  }
+  function readTheme() {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('theme');
+    if (fromUrl === 'light' || fromUrl === 'dark') return fromUrl;
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch (e) { /* private mode / disabled — ignore */ }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+    return 'dark';
+  }
+  function writeTheme(theme) {
+    const url = new URL(window.location.href);
+    // only pin in URL when user overrides; keep URLs clean otherwise
+    if (theme === 'light') url.searchParams.set('theme', 'light');
+    else url.searchParams.delete('theme');
+    history.replaceState(null, '', url.toString());
+    try { localStorage.setItem(LS_KEY, theme); } catch (e) { /* ignore */ }
+  }
+  applyTheme(readTheme());
+  themeBtn.addEventListener('click', () => {
+    const next = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+    writeTheme(next);
+    applyTheme(next);
+  });
+  // react to OS-level changes when the user hasn't manually overridden
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    mq.addEventListener && mq.addEventListener('change', (e) => {
+      let stored = null;
+      try { stored = localStorage.getItem(LS_KEY); } catch (err) {}
+      const params = new URLSearchParams(window.location.search);
+      // only follow the system if there's no explicit user choice
+      if (!stored && !params.get('theme')) {
+        applyTheme(e.matches ? 'light' : 'dark');
+      }
+    });
+  }
+
+  // ==================================================================
+  //  View toggle (arcade ↔ clean / recruiter-friendly)
+  //  - ?view=clean in URL activates clean view
+  //  - ?view=arcade (or no param) is arcade
+  //  - Button flips between the two; URL stays in sync
+  //  - Hash deep links still work in arcade; clean view ignores hash
+  // ==================================================================
+  const viewBtn = document.getElementById('viewToggle');
+  function applyView(mode) {
+    const clean = mode === 'clean';
+    document.body.classList.toggle('clean-mode', clean);
+    viewBtn.textContent = clean ? 'ARCADE VIEW' : 'CLEAN VIEW';
+    viewBtn.setAttribute('aria-pressed', String(clean));
+    // scroll clean view to top when entering
+    if (clean) window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  function readView() {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('view') === 'clean' ? 'clean' : 'arcade';
+  }
+  function writeView(mode) {
+    const url = new URL(window.location.href);
+    if (mode === 'clean') url.searchParams.set('view', 'clean');
+    else url.searchParams.delete('view');
+    history.replaceState(null, '', url.toString());
+  }
+  applyView(readView());
+  viewBtn.addEventListener('click', () => {
+    const next = document.body.classList.contains('clean-mode') ? 'arcade' : 'clean';
+    writeView(next);
+    applyView(next);
+  });
+
+})();
+</script>
+
+</body>
+</html>
