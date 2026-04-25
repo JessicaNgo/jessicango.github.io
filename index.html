@@ -14,7 +14,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0a1e'/%3E%3Crect x='6' y='6' width='20' height='20' fill='%23f7d51d'/%3E%3Crect x='10' y='10' width='12' height='12' fill='%230b0a1e'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -54,6 +54,23 @@
     min-height: 100vh;
   }
   .press { font-family: 'Press Start 2P', monospace; letter-spacing: 0.5px; }
+  /* Readable body font for text-heavy sections (about prose, job bullets, project blurbs). */
+  .prose, .prose p, .prose li, .prose span, .prose strong, .prose em, .prose b {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.55;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    font-smooth: auto;
+  }
+  .prose p { margin-bottom: 12px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose b, .prose strong { font-weight: 600; }
+  .prose a { color: var(--gold); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  .prose a:hover { color: var(--mint); }
+  body.light-theme .prose { color: #2a1d4a; }
+  body.light-theme .prose a { color: #b8870a; }
+  body.light-theme .prose a:hover { color: #2a7d5e; }
   a { color: inherit; text-decoration: none; }
   button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
   img { image-rendering: pixelated; }
@@ -101,7 +118,7 @@
   .topbar {
     position: sticky; top: 0; z-index: 50;
     display: flex; align-items: center; gap: 14px;
-    /* right padding reserves room for the fixed theme/view toggles in the top-right */
+    /* right padding reserves room for the fixed theme/view toggles */
     padding: 10px 170px 10px 18px;
     background: rgba(11, 10, 30, 0.92);
     border-bottom: 3px solid var(--edge);
@@ -110,6 +127,21 @@
     font-size: 10px;
   }
   .topbar .slot { color: var(--gold); }
+  /* Brand button: looks like the slot text but goes home on click */
+  .topbar button.slot {
+    background: transparent;
+    border: none;
+    padding: 4px 6px;
+    margin-left: -6px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--gold);
+    cursor: pointer;
+    transition: filter .12s;
+  }
+  .topbar button.slot:hover { filter: brightness(1.2) drop-shadow(0 0 6px var(--gold)); }
+  .topbar button.slot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .topbar .sep  { color: var(--dimmer); }
   .topbar .top-loc  { color: var(--mint); }
   .topbar .spacer { flex: 1; }
@@ -132,13 +164,23 @@
     background: var(--gold);
     box-shadow: inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;
   }
-  .topbar button.icon-btn {
-    padding: 4px 8px;
+  .topbar button.icon-btn,
+  .top-right-toggles .icon-btn {
+    background: var(--panel);
+    padding: 7px 12px 6px;
     border: 2px solid var(--edge-2);
-    font-size: 8px; color: var(--dim);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    color: var(--dim);
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
-  .topbar button.icon-btn:hover { color: var(--gold); border-color: var(--gold); }
-  .topbar button.icon-btn.on { color: var(--mint); border-color: var(--mint); }
+  .topbar button.icon-btn:hover,
+  .top-right-toggles .icon-btn:hover { color: var(--gold); border-color: var(--gold); }
+  .topbar button.icon-btn.on,
+  .top-right-toggles .icon-btn.on { color: var(--mint); border-color: var(--mint); }
 
   /* ---- Caffeine meter ---- */
   .topbar .caffeine {
@@ -182,30 +224,167 @@
     50%      { transform: translateY(-4px); }
   }
 
-  /* ---- Hidden coins: subtle pulse so they're findable ---- */
+  /* ---- Hidden coins: round $-stamped disc, gentle pulse ---- */
   .coin-pickup {
+    position: absolute;
+    width: 22px; height: 22px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><g fill='%23f7d51d'><rect x='5' y='1' width='6' height='1'/><rect x='3' y='2' width='10' height='1'/><rect x='2' y='3' width='12' height='2'/><rect x='1' y='5' width='14' height='6'/><rect x='2' y='11' width='12' height='2'/><rect x='3' y='13' width='10' height='1'/><rect x='5' y='14' width='6' height='1'/></g><g fill='%23b88a00'><rect x='14' y='5' width='1' height='6'/><rect x='13' y='11' width='1' height='2'/><rect x='12' y='12' width='2' height='1'/><rect x='11' y='13' width='2' height='1'/><rect x='9' y='14' width='2' height='1'/><rect x='13' y='4' width='1' height='1'/><rect x='12' y='3' width='1' height='1'/></g><g fill='%23fff5a0'><rect x='5' y='2' width='2' height='1'/><rect x='3' y='3' width='2' height='1'/><rect x='2' y='4' width='2' height='1'/><rect x='1' y='5' width='1' height='3'/><rect x='2' y='5' width='1' height='1'/></g><g fill='%237a4d00'><rect x='7' y='3' width='2' height='1'/><rect x='5' y='4' width='5' height='1'/><rect x='5' y='5' width='1' height='1'/><rect x='5' y='6' width='5' height='1'/><rect x='10' y='7' width='1' height='1'/><rect x='6' y='8' width='5' height='1'/><rect x='7' y='9' width='2' height='1'/></g></svg>") center/100% no-repeat;
+    border: none; padding: 0;
+    cursor: pointer;
     z-index: 5;
-    opacity: 1 !important;
     animation: coin-pulse 1.6s ease-in-out infinite;
     transition: transform 0.15s;
+    image-rendering: pixelated;
   }
-  .coin-pickup:hover { transform: scale(1.4); }
+  .coin-pickup:hover { transform: scale(1.3); }
   @keyframes coin-pulse {
-    0%, 100% {
-      box-shadow: inset -2px -2px 0 #b89800,
-                  inset 2px 2px 0 #fff5a0,
-                  0 0 0 0 rgba(255, 200, 0, 0.0),
-                  0 0 4px 1px rgba(255, 210, 50, 0.4);
-    }
-    50% {
-      box-shadow: inset -2px -2px 0 #b89800,
-                  inset 2px 2px 0 #fff5a0,
-                  0 0 0 3px rgba(255, 210, 50, 0.15),
-                  0 0 10px 3px rgba(255, 210, 50, 0.75);
-    }
+    0%, 100% { filter: drop-shadow(0 1px 0 rgba(0,0,0,0.55)) drop-shadow(0 0 1px rgba(255,210,50,0.4)); }
+    50%      { filter: drop-shadow(0 1px 0 rgba(0,0,0,0.55)) drop-shadow(0 0 7px rgba(255,210,50,0.95)); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .coin-pickup { animation: none; box-shadow: inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0, 0 0 6px 2px rgba(255,210,50,0.6); }
+    .coin-pickup { animation: none; }
+  }
+
+  /* ---- Wizard NPC on world map ---- */
+  .wizard-npc {
+    position: absolute;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 6;
+    width: 32px;
+    transform: translate(-50%, -100%);
+    animation: wizard-bob 2.4s ease-in-out infinite;
+    transition: transform 0.15s;
+  }
+  .wizard-npc svg {
+    width: 32px; height: 40px;
+    display: block;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5));
+  }
+  .wizard-npc:hover { transform: translate(-50%, calc(-100% - 2px)) scale(1.08); }
+  /* Speech bubble that always shows above the wizard */
+  .wizard-npc .wizard-label {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    background: #0a0920;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: filter 120ms ease, transform 120ms ease;
+  }
+  .wizard-npc .wizard-label:hover { filter: brightness(1.15); }
+  /* Speech bubble tail (gold border + dark fill) */
+  .wizard-npc .wizard-label::before,
+  .wizard-npc .wizard-label::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+  }
+  .wizard-npc .wizard-label::before {
+    bottom: -8px;
+    transform: translateX(-50%);
+    border-top: 8px solid var(--gold);
+  }
+  .wizard-npc .wizard-label::after {
+    bottom: -5px;
+    transform: translateX(-50%);
+    border-top: 6px solid #0a0920;
+  }
+  .wizard-npc:hover .wizard-label { filter: brightness(1.2); }
+  @keyframes wizard-bob {
+    0%, 100% { transform: translate(-50%, -100%); }
+    50%      { transform: translate(-50%, calc(-100% - 3px)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wizard-npc { animation: none; }
+  }
+
+  /* ---- Welcome banner (first-visit recruiter prompt) ---- */
+  .welcome-banner {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 49;
+    max-width: min(640px, 92vw);
+    padding: 14px 44px 14px 18px;
+    background: linear-gradient(180deg, #1a1140 0%, #0d0828 100%);
+    border: 3px solid var(--gold);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.45), 0 0 24px rgba(247,213,29,0.25);
+    animation: welcome-slide 0.45s ease-out;
+  }
+  .welcome-banner .wb-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .welcome-banner .wb-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .welcome-banner button {
+    padding: 8px 14px;
+    background: var(--gold);
+    color: #1a1400;
+    border: 2px solid #b88a00;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    transition: transform 0.1s steps(2);
+  }
+  .welcome-banner button.secondary {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--edge-2);
+    box-shadow: none;
+  }
+  .welcome-banner button:hover { transform: translate(-1px, -1px); }
+  .welcome-banner .wb-close {
+    position: absolute;
+    top: 6px; right: 8px;
+    padding: 0;
+    width: 28px; height: 28px;
+    background: transparent;
+    border: none;
+    color: var(--dim);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: none;
+  }
+  .welcome-banner .wb-close:hover { color: var(--gold); transform: none; }
+  @keyframes welcome-slide {
+    from { opacity: 0; transform: translate(-50%, -16px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @media (max-width: 720px) {
+    .welcome-banner { font-size: 13px; padding: 12px 40px 12px 14px; }
+    .welcome-banner .wb-title { font-size: 9px; }
   }
 
   /* ---- Powerup flash (one-shot overlay) ---- */
@@ -355,15 +534,15 @@
   }
 
   /* View swap */
-  .scene { display: none; width: 100%; max-width: 1080px; animation: fadein .25s steps(3); }
+  .scene { display: none; width: 100%; max-width: clamp(1080px, 92vw, 1640px); animation: fadein .25s steps(3); }
   .scene.active { display: block; }
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
   /* ========== SCENE: WORLD MAP ========== */
   .world {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 20px;
+    grid-template-columns: 1fr clamp(280px, 22vw, 360px);
+    gap: clamp(20px, 2vw, 32px);
     margin-top: 8px;
   }
   @media (max-width: 860px) {
@@ -451,8 +630,19 @@
     padding: 4px 6px;
     white-space: nowrap;
     letter-spacing: 1px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .pin .label .flavor {
+    display: block;
+    margin-top: 3px;
+    font-size: 6px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    font-weight: normal;
   }
   .pin:hover .label { color: var(--gold); border-color: var(--gold); }
+  .pin:hover .label .flavor { color: var(--gold); opacity: 0.7; }
   .pin .pulse {
     position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
     width: 10px; height: 3px; background: rgba(0,0,0,0.5);
@@ -568,14 +758,26 @@
     font-size: 9px; color: var(--magenta); letter-spacing: 2px;
   }
   .back-btn {
-    padding: 6px 10px;
-    border: 2px solid var(--edge-2);
+    padding: 10px 16px;
+    border: 3px solid var(--edge-2);
+    background: #0a0920;
     font-family: 'Press Start 2P', monospace;
-    font-size: 8px; color: var(--text);
-    letter-spacing: 1px;
+    font-size: 11px; color: var(--text);
+    letter-spacing: 1.5px;
     white-space: nowrap;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+    transition: all 0.12s steps(2);
   }
-  .back-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .back-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 rgba(247,213,29,0.3);
+  }
+  .back-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+  }
 
   /* --- Dialogue box (typewriter) --- */
   .dialog {
@@ -722,15 +924,19 @@
     color: var(--magenta); font-size: 19px; margin-bottom: 6px;
   }
   .quest-entry .flavor {
-    color: var(--dim); font-size: 18px; font-style: italic;
-    margin-bottom: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--dim); font-size: 14px; font-style: italic;
+    margin-bottom: 10px; line-height: 1.5;
   }
   .quest-entry ul {
     list-style: none; padding-left: 0;
-    color: var(--text); font-size: 19px;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14.5px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
   }
   .quest-entry ul li {
-    padding-left: 18px; position: relative; margin-bottom: 3px;
+    padding-left: 18px; position: relative; margin-bottom: 6px;
   }
   .quest-entry ul li::before {
     content: "+"; position: absolute; left: 0;
@@ -878,9 +1084,11 @@
   }
   .crate-content p {
     color: var(--text);
-    font-size: 12px;
-    line-height: 1.45;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
     margin: 0;
+    -webkit-font-smoothing: antialiased;
   }
   .crate-content .tags { flex-shrink: 0; margin-top: auto; padding-top: 4px; }
   .tags { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -1172,21 +1380,50 @@
     font-size: 12px; color: #7b8694;
   }
 
-  /* ========== GLOBAL HINT STRIP ========== */
+  /* ========== GLOBAL HINT STRIP (also hosts the coin/caff HUD) ========== */
   .hint-strip {
     position: fixed; bottom: 8px; left: 50%;
     transform: translateX(-50%);
     background: rgba(10,9,32,0.88);
     border: 2px solid var(--edge);
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-family: 'Press Start 2P', monospace;
-    font-size: 7px; color: var(--dim); letter-spacing: 1px;
+    font-size: 8px; color: var(--dim); letter-spacing: 1px;
     z-index: 150;
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; justify-content: center;
     pointer-events: none;
   }
   .hint-strip .k {
     color: var(--text); padding: 2px 4px;
     border: 1px solid var(--edge-2);
+  }
+  .hint-strip .hud-sep { color: var(--dimmer); }
+  .hint-strip .hud-coins,
+  .hint-strip .hud-caffeine {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8px;
+  }
+  .hint-strip .hud-coins { color: var(--gold); }
+  .hint-strip .hud-coins .c {
+    display: inline-block; width: 10px; height: 10px;
+    background: var(--gold);
+    box-shadow: inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;
+  }
+  .hint-strip .hud-caffeine { color: #d4986a; }
+  .hint-strip .hud-caffeine .cup {
+    display: inline-block; width: 10px; height: 10px;
+    background: #d4986a;
+    box-shadow: inset -2px -2px 0 #7a4820, inset 2px 2px 0 #f0c8a0;
+  }
+  body.powered-up .hint-strip .hud-caffeine {
+    color: var(--gold);
+    animation: caff-glow 0.6s steps(4) infinite;
+  }
+  body.powered-up .hint-strip .hud-caffeine .cup {
+    background: var(--gold);
+    box-shadow: inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0,
+                0 0 8px #ffaa00;
   }
 
   /* reduced motion */
@@ -1197,20 +1434,60 @@
   /* ========== MOBILE ========== */
   @media (max-width: 720px) {
     body { font-size: 19px; }
-    .stage { padding: 12px; }
+    .stage { padding: 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .loc { padding: 18px 16px 22px; }
     .loc-head .title { font-size: 13px; }
     .loc-head .sub { font-size: 8px; }
     .quest-entry { grid-template-columns: 32px 1fr; }
     .quest-entry .date { grid-column: 2; text-align: left; margin-top: 4px; }
-    .topbar { font-size: 8px; gap: 8px; padding: 8px 120px 8px 10px; }
+    .topbar {
+      font-size: 8px; gap: 6px;
+      padding: 8px 56px 8px 10px;
+      padding-top: max(8px, env(safe-area-inset-top));
+    }
     .topbar .hint { display: none; }
+    .topbar .coins, .topbar .caffeine { font-size: 8px; }
+    .topbar #soundBtn { display: none; }
     .archives-grid { grid-template-columns: 1fr; }
     .sprite-frame { width: 180px; height: 180px; }
-    .hint-strip { display: none; }
-    .top-right-toggles { top: 6px; right: 6px; gap: 6px; }
-    .view-toggle { font-size: 7px; padding: 5px 9px; }
-    .theme-toggle { font-size: 12px; padding: 4px 8px; min-width: 28px; }
+    /* Hint strip stays — it's now the coin/caff HUD too. Compact for mobile,
+       and the keyboard-hint section is hidden (no keyboard on mobile). */
+    .hint-strip {
+      font-size: 7px; padding: 5px 8px; gap: 6px;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      max-width: calc(100vw - 80px);
+    }
+    .hint-strip .hud-keys,
+    .hint-strip .hud-keys-sep { display: none; }
+    /* Collapse toggles into hamburger at top-right */
+    .top-right-toggles {
+      top: max(8px, env(safe-area-inset-top));
+      right: 8px;
+      bottom: auto;
+      left: auto;
+      gap: 0;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    .menu-toggle { display: grid !important; }
+    .top-right-toggles .menu-content {
+      display: none !important;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 8px;
+      background: rgba(10,9,32,0.94);
+      border: 2px solid var(--edge-2);
+      box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    }
+    .top-right-toggles.open .menu-content { display: flex !important; }
+    .top-right-toggles .menu-content .view-toggle,
+    .top-right-toggles .menu-content .theme-toggle,
+    .top-right-toggles .menu-content .icon-btn {
+      width: 100%;
+      text-align: center;
+    }
+    .menu-content #soundBtn { display: inline-block; }
   }
 
   /* ========================================================= */
@@ -1231,6 +1508,38 @@
     cursor: pointer;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
     line-height: 1;
+  }
+  /* Hamburger menu toggle (mobile only — hidden on desktop) */
+  .menu-toggle {
+    display: none;
+    background: var(--panel);
+    border: 2px solid var(--edge-2);
+    color: var(--gold);
+    width: 36px; height: 36px;
+    place-items: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .menu-toggle::before {
+    content: "";
+    width: 18px; height: 2px;
+    background: var(--gold);
+    box-shadow: 0 -6px 0 var(--gold), 0 6px 0 var(--gold);
+  }
+  .menu-toggle:hover { background: var(--gold); }
+  .menu-toggle:hover::before { background: var(--bg); box-shadow: 0 -6px 0 var(--bg), 0 6px 0 var(--bg); }
+  .top-right-toggles.open .menu-toggle::before {
+    background: transparent;
+    box-shadow: 0 0 0 var(--gold);
+    transform: rotate(45deg);
+    position: relative;
+  }
+  /* Desktop: just a transparent flex container — buttons have their own
+     backgrounds. The topbar no longer extends under here, so they sit on
+     the page background cleanly. */
+  .top-right-toggles .menu-content {
+    display: flex;
+    gap: 8px;
   }
   .theme-toggle {
     font-family: system-ui, -apple-system, 'Segoe UI Symbol', sans-serif;
@@ -1268,8 +1577,9 @@
   }
   body.clean-mode #clean-view { display: block; }
   body.clean-mode .view-toggle,
-  body.clean-mode .theme-toggle {
-    background: transparent;
+  body.clean-mode .theme-toggle,
+  body.clean-mode .icon-btn {
+    background: rgba(13, 12, 32, 0.85);
     border: 1px solid var(--edge-2);
     color: var(--dim);
     letter-spacing: 0.2px;
@@ -1286,8 +1596,16 @@
     padding: 5px 10px;
   }
   body.clean-mode .view-toggle:hover,
-  body.clean-mode .theme-toggle:hover {
-    color: var(--gold); border-color: var(--gold); background: transparent;
+  body.clean-mode .theme-toggle:hover,
+  body.clean-mode .icon-btn:hover {
+    color: var(--gold); border-color: var(--gold);
+    background: rgba(13, 12, 32, 0.95);
+  }
+  /* Clean mode: keep wrapper subtle (same surface as buttons) */
+  body.clean-mode .top-right-toggles .menu-content {
+    background: rgba(13, 12, 32, 0.6);
+    border-color: var(--edge);
+    box-shadow: none;
   }
 
   #clean-view {
@@ -1451,6 +1769,23 @@
 
   /* chrome surfaces that had hardcoded dark values need overrides */
   body.light-theme .topbar { background: rgba(243,233,200,0.92); }
+  /* Light theme: top-right toggles wrapper matches the cream chrome */
+  body.light-theme .top-right-toggles .menu-content {
+    background: rgba(243, 233, 200, 0.92);
+    border-color: var(--edge-2);
+    box-shadow: 2px 2px 0 rgba(106, 74, 8, 0.18);
+  }
+  body.light-theme.clean-mode .top-right-toggles .menu-content {
+    background: rgba(243, 233, 200, 0.7);
+    box-shadow: none;
+  }
+  body.light-theme.clean-mode .view-toggle,
+  body.light-theme.clean-mode .theme-toggle,
+  body.light-theme.clean-mode .icon-btn {
+    background: rgba(255, 248, 220, 0.85);
+    color: #6a4a08;
+    border-color: var(--edge-2);
+  }
   body.light-theme .card  { background: linear-gradient(180deg, #f3e9c8 0%, #ecdfb1 100%); }
   body.light-theme .quest-head { background: linear-gradient(180deg, #ecdfb1 0%, #d9c789 100%); }
   body.light-theme .hint-strip { background: rgba(243,233,200,0.88); }
@@ -1463,6 +1798,49 @@
     background: #fff8dc;
     border-color: var(--edge-2);
     color: var(--text);
+  }
+
+  /* welcome banner: warm cream chrome to match light dialogs */
+  body.light-theme .welcome-banner {
+    background: linear-gradient(180deg, #fff8dc 0%, #f5e6a8 100%);
+    border-color: var(--gold);
+    color: var(--text);
+    box-shadow: 0 6px 0 rgba(120,90,20,0.25), 0 0 24px rgba(247,213,29,0.35);
+  }
+  body.light-theme .welcome-banner .wb-title {
+    color: #6a4a08;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+  }
+  body.light-theme .welcome-banner button {
+    /* primary CTA: gold-on-dark stays the same — pops on cream bg */
+    background: var(--gold);
+    color: #1a1400;
+    border-color: #b88a00;
+    box-shadow: 2px 2px 0 rgba(120,90,20,0.4);
+  }
+  body.light-theme .welcome-banner button.secondary {
+    background: rgba(255,255,255,0.4);
+    color: var(--text);
+    border-color: var(--edge-2);
+    box-shadow: none;
+  }
+  body.light-theme .welcome-banner button.secondary:hover {
+    background: var(--gold);
+    color: #1a1400;
+    border-color: var(--gold);
+  }
+  body.light-theme .welcome-banner .wb-close { color: #6a4a08; }
+  body.light-theme .welcome-banner .wb-close:hover { color: var(--gold); }
+
+  /* wizard speech bubble in light mode: cream chrome to match dialogs */
+  body.light-theme .wizard-npc .wizard-label {
+    background: #fff8dc;
+    color: #6a4a08;
+    border-color: var(--gold);
+    box-shadow: 2px 2px 0 rgba(120,90,20,0.3);
+  }
+  body.light-theme .wizard-npc .wizard-label::after {
+    border-top-color: #fff8dc;
   }
 
   /* back-btn / nav-btn readable on light chrome */
@@ -1739,12 +2117,18 @@
 </head>
 <body>
 
-<!-- ========== TOP-RIGHT TOGGLES (theme + view) ========== -->
-<div class="top-right-toggles">
-  <button class="theme-toggle" id="themeToggle" type="button"
-          aria-label="Toggle light/dark theme" title="Toggle light/dark">☀</button>
-  <button class="view-toggle" id="viewToggle" type="button"
-          aria-label="Toggle between arcade view and recruiter-friendly view">CLEAN VIEW</button>
+<!-- ========== TOP-RIGHT TOGGLES (theme + view + sound) ========== -->
+<div class="top-right-toggles" id="topRightToggles">
+  <button class="menu-toggle" id="menuToggle" type="button"
+          aria-label="Open settings menu" aria-expanded="false"></button>
+  <div class="menu-content">
+    <button class="icon-btn sfx-btn" id="soundBtn" type="button"
+            title="Sound FX (off by default)">SFX OFF</button>
+    <button class="theme-toggle" id="themeToggle" type="button"
+            aria-label="Toggle light/dark theme" title="Toggle light/dark">☀</button>
+    <button class="view-toggle" id="viewToggle" type="button"
+            aria-label="Toggle between arcade view and recruiter-friendly view">CLEAN VIEW</button>
+  </div>
 </div>
 
 <!-- Parallax starfields (generated via JS) -->
@@ -1754,20 +2138,25 @@
 
 <!-- ========== TOP BAR ========== -->
 <div class="topbar">
-  <span class="slot">★ SAVE 01 — JESSICA NGO</span>
+  <button class="slot" id="brandHome" type="button"
+          aria-label="Home — return to world map" title="Return to world map">★ SAVE 01 — JESSICA NGO</button>
   <span class="sep">·</span>
   <span class="top-loc" id="topLoc">WORLD MAP</span>
   <span class="spacer"></span>
-  <span class="coins" title="Collect 5 to unlock the end-game">
-    <span class="c"></span><span id="coinCount">0</span>/5
-  </span>
-  <span class="caffeine" title="Collect coffee/tea to reach 100% and power up">
-    <span class="cup"></span><span id="caffeineCount">0</span>/100
-  </span>
-  <span class="hint">
-    <kbd>1-5</kbd> travel · <kbd>0</kbd> map · <kbd>/</kbd> term
-  </span>
-  <button class="icon-btn" id="soundBtn" title="Sound FX (off by default)">SFX OFF</button>
+</div>
+
+<!-- First-visit welcome / recruiter prompt -->
+<div class="welcome-banner" id="welcomeBanner" role="dialog" aria-labelledby="wbTitle" hidden>
+  <button class="wb-close" id="wbClose" type="button" aria-label="Dismiss">×</button>
+  <div class="wb-title" id="wbTitle">★ WELCOME, ADVENTURER</div>
+  <div>
+    Hi! This is an arcade-style portfolio. Click around the map, hit number keys 1-5,
+    or talk to the wizard. <b>Just here for the resume?</b> Hit the button below.
+  </div>
+  <div class="wb-actions">
+    <button id="wbCleanBtn" type="button">RECRUITER VIEW →</button>
+    <button class="secondary" id="wbExploreBtn" type="button">I'll explore</button>
+  </div>
 </div>
 
 <!-- ========== STAGE ========== -->
@@ -1788,7 +2177,7 @@
           </div>
         </div>
         <div class="caption">
-          LV 28<br/><span style="color:var(--mint);">9 YRS ENG</span>
+          LV 9<br/><span style="color:var(--mint);">9 YRS ENG</span>
         </div>
       </div>
 
@@ -1972,11 +2361,11 @@
 
           <!-- REGION LABELS (small pixel-style) -->
           <g font-family="'Press Start 2P', monospace" font-size="3" fill="#e8e6d4" opacity="0.55">
-            <text x="4" y="88">FOREST · QUESTS</text>
-            <text x="52" y="88">TOWN · ARCHIVES</text>
-            <text x="110" y="88">HARBOUR · TAVERN</text>
-            <text x="116" y="38">PEAKS · TROPHIES</text>
-            <text x="22" y="42">MARKET · SHOP</text>
+            <text x="4" y="88"> · QUESTS</text>
+            <text x="52" y="88"> · ARCHIVES</text>
+            <text x="110" y="88"> · TAVERN</text>
+            <text x="116" y="38"> · PEAKS</text>
+            <text x="22" y="42"> · SHOP</text>
           </g>
         </svg>
 
@@ -2009,40 +2398,76 @@
         </div>
 
         <!-- Pins: positioned as % of map -->
-        <button class="pin" data-loc="archives" style="--color:var(--cyan); --glyph:'i'; left: 40%; top: 58%;">
+        <button class="pin" data-loc="archives" style="--color:var(--cyan); --glyph:'?'; left: 40%; top: 58%;">
           <div class="marker"></div>
-          <div class="label">ARCHIVES</div>
+          <div class="label">ABOUT ME<span class="flavor">archives</span></div>
           <div class="pulse"></div>
         </button>
 
         <button class="pin" data-loc="quest-board" style="--color:var(--mint); --glyph:'!'; left: 11%; top: 82%;">
           <div class="marker"></div>
-          <div class="label">QUEST BOARD</div>
+          <div class="label">EXPERIENCE<span class="flavor">quests</span></div>
           <div class="pulse"></div>
         </button>
 
-        <button class="pin" data-loc="inventory" style="--color:var(--magenta); --glyph:'i'; left: 19%; top: 55%;">
+        <button class="pin" data-loc="inventory" style="--color:var(--magenta); --glyph:'$'; left: 19%; top: 55%;">
           <div class="marker"></div>
-          <div class="label">SHOP</div>
+          <div class="label">PROJECTS<span class="flavor">shop</span></div>
           <div class="pulse"></div>
         </button>
 
         <button class="pin" data-loc="trophy" style="--color:var(--gold); --glyph:'★'; left: 90%; top: 22%;">
           <div class="marker"></div>
-          <div class="label">TROPHY HALL</div>
+          <div class="label">ESPORTS<span class="flavor">trophy</span></div>
           <div class="pulse"></div>
         </button>
 
-        <button class="pin" data-loc="tavern" style="--color:#c47048; --glyph:'a'; left: 75%; top: 73%;">
+        <button class="pin" data-loc="tavern" style="--color:#c47048; --glyph:'@'; left: 75%; top: 73%;">
           <div class="marker"></div>
-          <div class="label">TAVERN</div>
+          <div class="label">CONTACT<span class="flavor">tavern</span></div>
           <div class="pulse"></div>
         </button>
 
-        <!-- Hidden coin #1: glint in the sky above the peaks -->
-        <button class="coin-pickup" data-coin="1"
-          style="position:absolute;left:6%;top:8%;width:14px;height:14px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;z-index:10;"
-          title="shiny..." aria-label="hidden coin"></button>
+        <!-- Wizard NPC: tap him for the recruiter view -->
+        <button class="wizard-npc" id="wizardNpc" type="button"
+                style="left:48%;top:38%;"
+                title="Just here for the resume? Click me."
+                aria-label="Wizard NPC: switch to recruiter view">
+          <svg viewBox="0 0 16 20" shape-rendering="crispEdges" aria-hidden="true">
+            <!-- pointed hat -->
+            <rect x="7" y="0" width="2" height="1" fill="#5d3aa5"/>
+            <rect x="6" y="1" width="4" height="1" fill="#5d3aa5"/>
+            <rect x="5" y="2" width="6" height="1" fill="#5d3aa5"/>
+            <rect x="4" y="3" width="8" height="1" fill="#5d3aa5"/>
+            <rect x="3" y="4" width="10" height="1" fill="#3a2370"/>
+            <!-- hat band w/ star -->
+            <rect x="3" y="5" width="10" height="1" fill="#241650"/>
+            <rect x="7" y="5" width="2" height="1" fill="#f7d51d"/>
+            <!-- face -->
+            <rect x="5" y="6" width="6" height="3" fill="#f3c7a0"/>
+            <!-- eyes -->
+            <rect x="6" y="7" width="1" height="1" fill="#0b0a1e"/>
+            <rect x="9" y="7" width="1" height="1" fill="#0b0a1e"/>
+            <!-- white beard -->
+            <rect x="4" y="9" width="8" height="3" fill="#e8e6d4"/>
+            <rect x="5" y="12" width="6" height="2" fill="#e8e6d4"/>
+            <rect x="6" y="14" width="4" height="1" fill="#e8e6d4"/>
+            <!-- robe -->
+            <rect x="3" y="12" width="10" height="6" fill="#5d3aa5"/>
+            <rect x="3" y="12" width="1" height="6" fill="#3a2370"/>
+            <rect x="12" y="12" width="1" height="6" fill="#3a2370"/>
+            <!-- staff w/ orb -->
+            <rect x="13" y="6" width="1" height="12" fill="#6a4028"/>
+            <rect x="12" y="5" width="3" height="1" fill="#5dcaa5"/>
+            <rect x="13" y="4" width="1" height="1" fill="#5dcaa5"/>
+            <rect x="12" y="6" width="3" height="1" fill="#5dcaa5"/>
+            <!-- feet -->
+            <rect x="5" y="18" width="2" height="2" fill="#241650"/>
+            <rect x="9" y="18" width="2" height="2" fill="#241650"/>
+          </svg>
+          <span class="wizard-label">» SHOW ME THE RESUME</span>
+        </button>
+
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-top:12px;font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;">
@@ -2115,7 +2540,7 @@
             <div class="bar"><span></span></div>
           </div>
           <div class="stat-row xp">
-            <div class="k"><span>XP — LV 28</span><span class="v">82%</span></div>
+            <div class="k"><span>XP — LV 9</span><span class="v">82%</span></div>
             <div class="bar"><span></span></div>
           </div>
           <div class="stat-row mp">
@@ -2128,11 +2553,11 @@
       <div class="card">
         <h3>FAST TRAVEL</h3>
         <div class="nav-list">
-          <button class="nav-btn" data-loc="archives">ARCHIVES <span class="key">[1]</span></button>
-          <button class="nav-btn" data-loc="quest-board">QUEST BOARD <span class="key">[2]</span></button>
-          <button class="nav-btn" data-loc="inventory">SHOP <span class="key">[3]</span></button>
-          <button class="nav-btn" data-loc="trophy">TROPHY HALL <span class="key">[4]</span></button>
-          <button class="nav-btn" data-loc="tavern">TAVERN <span class="key">[5]</span></button>
+          <button class="nav-btn" data-loc="archives">ABOUT ME <span class="key">[1]</span></button>
+          <button class="nav-btn" data-loc="quest-board">EXPERIENCE <span class="key">[2]</span></button>
+          <button class="nav-btn" data-loc="inventory">PROJECTS <span class="key">[3]</span></button>
+          <button class="nav-btn" data-loc="trophy">ESPORTS <span class="key">[4]</span></button>
+          <button class="nav-btn" data-loc="tavern">CONTACT <span class="key">[5]</span></button>
         </div>
       </div>
 
@@ -2156,8 +2581,8 @@
   <div class="loc">
     <div class="loc-head">
       <div>
-        <div class="title">◆ THE ARCHIVES</div>
-        <div class="sub">» ABOUT.MD  ·  CHAPTER 01</div>
+        <div class="title">◆ ABOUT ME</div>
+        <div class="sub">» THE ARCHIVES  ·  CHAPTER 01</div>
       </div>
       <button class="back-btn" data-loc="map">← WORLD MAP</button>
     </div>
@@ -2228,19 +2653,21 @@
       </div>
 
       <div>
-        <div style="font-size:19px;line-height:1.5;color:var(--text);">
-          <p style="margin-bottom:12px;">
+        <div class="prose" style="color:var(--text);">
+          <p>
             I'm a senior backend engineer. Currently at
             <span style="color:var(--mint);">Alltrue.ai</span>, I own the backend for an
             AI safety &amp; compliance product shipped to clients worldwide. I like
             async systems, dense pipelines, and the kind of monitoring that lets
             you sleep through on-call.
           </p>
-          <p style="margin-bottom:12px;">
+          <p>
             Before that, I spent five years writing cancer-diagnostics software
-            (my work shows up in papers published in <b style="color:var(--gold);">Cell</b> and
-            <b style="color:var(--gold);">Nature Scientific Reports</b>), and 2.5 years as a
-            professional <span style="color:var(--magenta);">Counter-Strike</span> player —
+            (my work shows up in papers published in
+            <a href="https://aparicio.molonc.ca/papers/31730858" target="_blank" rel="noopener"><b style="color:var(--gold);">Cell</b></a>
+            and
+            <a href="https://pubmed.ncbi.nlm.nih.gov/30867481/" target="_blank" rel="noopener"><b style="color:var(--gold);">Nature Scientific Reports</b></a>),
+            and 2.5 years as a professional <span style="color:var(--magenta);">Counter-Strike</span> player —
             captaining rosters for Evil Geniuses, Nouns, and Team Canada.
           </p>
           <p style="color:var(--dim);font-style:italic;">
@@ -2251,6 +2678,7 @@
         <div class="loadout-card">
           <h4>» LOADOUT</h4>
           <div class="loadout-row"><span class="k">LANGUAGES</span><span class="v">Python · Java · C/C++</span></div>
+          <div class="loadout-row"><span class="k">FRAMEWORKS</span><span class="v">FastAPI · Django · Flask</span></div>
           <div class="loadout-row"><span class="k">DATASTORES</span><span class="v">PostgreSQL · MySQL · MongoDB · Redis</span></div>
           <div class="loadout-row"><span class="k">CLOUD</span><span class="v">AWS — ECS · Lambda · S3 · EventBridge · Bedrock</span></div>
           <div class="loadout-row"><span class="k">APIs</span><span class="v">REST · GraphQL · Pydantic schemas</span></div>
@@ -2265,12 +2693,17 @@
 
     <!-- hidden coin #2 behind sprite label -->
     <button class="coin-pickup" data-coin="2"
-      style="position:absolute;right:26px;bottom:22px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      style="right:26px;bottom:22px;"
       title="shiny..." aria-label="hidden coin"></button>
 
-    <!-- ☕ caffeine pickup #1 (tea) -->
+    <!-- hidden coin #1 (formerly on world map) -->
+    <button class="coin-pickup" data-coin="1"
+      style="left:18px;top:14px;"
+      title="shiny..." aria-label="hidden coin"></button>
+
+    <!-- caffeine #1: tea on the archive shelf -->
     <button class="caffeine-pickup" data-caffeine="1"
-      style="left:22px; top:86px;" title="+20 caffeine" aria-label="tea powerup">
+      style="right:18px;top:14px;" title="+20 caffeine" aria-label="tea powerup">
       <svg viewBox="0 0 10 12" shape-rendering="crispEdges">
         <rect x="3" y="0" width="1" height="1" fill="#e8e8ee" opacity="0.6"/>
         <rect x="4" y="1" width="1" height="1" fill="#e8e8ee" opacity="0.75"/>
@@ -2284,6 +2717,7 @@
         <rect x="0" y="9" width="9" height="1" fill="#a0c8b0"/>
       </svg>
     </button>
+
   </div>
 </section>
 
@@ -2294,8 +2728,8 @@
   <div class="loc">
     <div class="loc-head">
       <div>
-        <div class="title">◆ THE QUEST BOARD</div>
-        <div class="sub">» EXPERIENCE.LOG  ·  5 ENTRIES</div>
+        <div class="title">◆ WORK EXPERIENCE</div>
+        <div class="sub">» THE QUEST BOARD  ·  5 ENTRIES</div>
       </div>
       <button class="back-btn" data-loc="map">← WORLD MAP</button>
     </div>
@@ -2396,7 +2830,7 @@
 
     <!-- hidden coin #3 -->
     <button class="coin-pickup" data-coin="3"
-      style="position:absolute;left:18px;bottom:18px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      style="left:18px;bottom:18px;"
       title="shiny..." aria-label="hidden coin"></button>
 
     <!-- ☕ caffeine pickup #2 (coffee) -->
@@ -2424,8 +2858,8 @@
   <div class="loc">
     <div class="loc-head">
       <div>
-        <div class="title">◆ THE SHOP</div>
-        <div class="sub">» INVENTORY.IDX  ·  4 ITEMS</div>
+        <div class="title">◆ PROJECTS</div>
+        <div class="sub">» THE SHOP  ·  4 ITEMS</div>
       </div>
       <button class="back-btn" data-loc="map">← WORLD MAP</button>
     </div>
@@ -2514,7 +2948,7 @@
 
     <!-- hidden coin #4 -->
     <button class="coin-pickup" data-coin="4"
-      style="position:absolute;right:20px;top:70px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;"
+      style="right:20px;top:70px;"
       title="shiny..." aria-label="hidden coin"></button>
 
     <!-- ☕ caffeine pickup #3 (coffee) -->
@@ -2542,8 +2976,8 @@
   <div class="loc" style="border-color:var(--magenta);box-shadow:0 0 0 4px var(--bg), 0 0 0 6px var(--magenta);">
     <div class="loc-head" style="border-bottom-color:var(--magenta);">
       <div>
-        <div class="title" style="color:var(--magenta);">◆ THE TROPHY HALL</div>
-        <div class="sub" style="color:var(--gold);">» SECRET AREA DISCOVERED</div>
+        <div class="title" style="color:var(--magenta);">◆ ESPORTS — COUNTER-STRIKE</div>
+        <div class="sub" style="color:var(--gold);">» THE TROPHY HALL</div>
       </div>
       <button class="back-btn" data-loc="map">← WORLD MAP</button>
     </div>
@@ -2561,7 +2995,7 @@
       <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--magenta);letter-spacing:2px;margin-bottom:14px;">
         2022 – 2025  ·  TEAM CAPTAIN  ·  NA / INTL CIRCUIT
       </div>
-      <p style="font-size:20px;color:var(--text);">
+      <p class="prose" style="color:var(--text);">
         Two and a half years as a paid esports athlete, captaining rosters across three orgs.
         Drafted playbooks, called mid-round adjustments, debugged team chemistry under
         tournament pressure. If you've ever shipped a fix at 2 a.m. with a crowd watching —
@@ -2584,7 +3018,7 @@
         <div class="trophy-card">
           <div class="medal">★</div>
           <div class="team">TEAM CANADA</div>
-          <div class="yr">NATIONAL · 2022–25</div>
+          <div class="yr">NATIONAL · 2024–25</div>
           <div class="note">Represented Canada internationally.</div>
         </div>
       </div>
@@ -2602,7 +3036,7 @@
 
     <!-- hidden coin #5 -->
     <button class="coin-pickup" data-coin="5"
-      style="position:absolute;left:22px;bottom:22px;width:12px;height:12px;padding:0;background:var(--gold);box-shadow:inset -2px -2px 0 #b89800, inset 2px 2px 0 #fff5a0;border:none;opacity:0.85;z-index:5;"
+      style="left:22px;bottom:22px;z-index:5;"
       title="shiny..." aria-label="hidden coin"></button>
 
     <!-- ☕ caffeine pickup #4 (tea) -->
@@ -2631,8 +3065,8 @@
   <div class="loc">
     <div class="loc-head">
       <div>
-        <div class="title">◆ THE TAVERN</div>
-        <div class="sub">» CONTACT.TXT  ·  PARTY HALL</div>
+        <div class="title">◆ CONTACT</div>
+        <div class="sub">» THE TAVERN  ·  PARTY HALL</div>
       </div>
       <button class="back-btn" data-loc="map">← WORLD MAP</button>
     </div>
@@ -2672,9 +3106,11 @@
 
     <div class="tavern-note">
       <b>» PINNED TO THE WALL:</b> Currently open to
-      <span style="color:var(--mint);">senior backend</span>,
-      <span style="color:var(--mint);">infra</span>, and
-      <span style="color:var(--mint);">AI-safety</span> roles.
+      <span style="color:var(--mint);">Senior Backend</span>,
+      <span style="color:var(--mint);">Senior Full-Stack</span>,
+      <span style="color:var(--mint);">AI Engineer</span>, or
+      <span style="color:var(--mint);">Tech Lead</span> roles.
+      Also accepting <span style="color:var(--gold);">"professional gamer."</span>
     </div>
 
     <!-- ☕ caffeine pickup #5 (coffee on the bar) -->
@@ -2897,7 +3333,7 @@
         <li><span class="killer">jesscas</span> <span class="wep">[redis]</span> <span class="victim">request_timeout</span> <span class="hl">clutch 1v4</span></li>
       </ul>
       <div class="cs2-hint">
-        rosters: Evil Geniuses (2023–24) · Nouns (2024–25) · Team Canada (2022–25).<br/>
+        rosters: Evil Geniuses (2023–24) · Nouns (2024–25) · Team Canada (2024–25).<br/>
         match history: <a href="https://www.hltv.org/player/21794/jesscas" target="_blank" style="color:#7cc5ff;">hltv.org/player/21794/jesscas</a> · press <kbd>esc</kbd> to close.
       </div>
     </div>
@@ -2906,7 +3342,15 @@
 
 <div class="scanlines"></div>
 <div class="hint-strip">
-  <span class="k">0</span> MAP · <span class="k">1-5</span> TRAVEL · <span class="k">/</span> TERM · <span class="k">?</span> HELP
+  <span class="hud-coins" title="Collect 5 to unlock the end-game">
+    <span class="c"></span><span id="coinCount">0</span>/5
+  </span>
+  <span class="hud-sep">·</span>
+  <span class="hud-caffeine" title="Collect coffee/tea to reach 100% and power up">
+    <span class="cup"></span><span id="caffeineCount">0</span>/100
+  </span>
+  <span class="hud-sep hud-keys-sep">·</span>
+  <span class="hud-keys"><span class="k">0</span> MAP · <span class="k">1-5</span> TRAVEL · <span class="k">/</span> TERM · <span class="k">?</span> HELP</span>
 </div>
 
 <script>
@@ -2937,11 +3381,11 @@
   // ==================================================================
   const scenes = {
     map:           { el: document.getElementById('scene-map'),         label: 'WORLD MAP' },
-    archives:      { el: document.getElementById('scene-archives'),    label: 'ARCHIVES' },
-    'quest-board': { el: document.getElementById('scene-quest-board'), label: 'QUEST BOARD' },
-    inventory:     { el: document.getElementById('scene-inventory'),   label: 'SHOP' },
-    trophy:        { el: document.getElementById('scene-trophy'),      label: 'TROPHY HALL' },
-    tavern:        { el: document.getElementById('scene-tavern'),      label: 'TAVERN' },
+    archives:      { el: document.getElementById('scene-archives'),    label: 'ABOUT ME' },
+    'quest-board': { el: document.getElementById('scene-quest-board'), label: 'EXPERIENCE' },
+    inventory:     { el: document.getElementById('scene-inventory'),   label: 'PROJECTS' },
+    trophy:        { el: document.getElementById('scene-trophy'),      label: 'ESPORTS' },
+    tavern:        { el: document.getElementById('scene-tavern'),      label: 'CONTACT' },
   };
   const locToKey = { 'map':'0','archives':'1','quest-board':'2','inventory':'3','trophy':'4','tavern':'5' };
   const pinPos = {
@@ -3007,6 +3451,15 @@
     }
   });
 
+  // Brand → home
+  const brandHome = document.getElementById('brandHome');
+  if (brandHome) {
+    brandHome.addEventListener('click', (e) => {
+      e.preventDefault();
+      go('map');
+    });
+  }
+
   // Keys
   const keyMap = {'0':'map','1':'archives','2':'quest-board','3':'inventory','4':'trophy','5':'tavern'};
   document.addEventListener('keydown', (e) => {
@@ -3044,11 +3497,11 @@
     tavern: `Take a seat. Best way to reach the hero is <span class="hl">email</span> — the rest are there for due diligence. gg &amp; hit me up.`,
   };
   const achLabels = {
-    archives: 'Read the Profile',
-    'quest-board': 'Checked the Board',
-    inventory: 'Browsed the Shop',
-    trophy: 'Found the Secret Area',
-    tavern: 'Visited the Tavern',
+    archives: 'Visited About Me',
+    'quest-board': 'Visited Experience',
+    inventory: 'Visited Projects',
+    trophy: 'Visited Esports',
+    tavern: 'Visited Contact',
   };
   const typewriterState = new WeakMap();
   function runTypewriter(dlg) {
@@ -3214,6 +3667,7 @@
       foundCoins.add(id);
       localStorage.setItem('jn_coins', JSON.stringify([...foundCoins]));
       updateCoinCount();
+      if (window.__sfx) window.__sfx.coin();
       // little sparkle: animate the coin away
       coin.style.transition = 'transform .4s, opacity .4s';
       coin.style.transform = 'translateY(-40px) scale(1.6)';
@@ -3270,6 +3724,7 @@
     }
     setTimeout(() => { flash.remove(); banner.remove(); }, 1900);
     setPowered(true);
+    if (window.__sfx) window.__sfx.powerup();
     achievement('caff100', 'SUPER MODE · 100% CAFFEINE', 200);
   }
   document.querySelectorAll('.caffeine-pickup').forEach(cup => {
@@ -3285,6 +3740,7 @@
       cup.style.opacity = '0';
       setTimeout(() => cup.remove(), 520);
       updateCaffeine();
+      if (window.__sfx) window.__sfx.coffee();
       if (currentCaffeine() >= 100 && localStorage.getItem(POWER_KEY) !== '1') {
         setTimeout(triggerPowerup, 350);
       } else {
@@ -3315,12 +3771,12 @@
   const tcmds = {
     help: () => `available: <span class="kw">help</span>, <span class="kw">whoami</span>, <span class="kw">ls</span>, <span class="kw">about</span>, <span class="kw">work</span>, <span class="kw">projects</span>, <span class="kw">esports</span>, <span class="kw">hire</span>, <span class="kw">rush b</span>, <span class="kw">gg</span>, <span class="kw">konami</span>, <span class="kw">clear</span>, <span class="kw">exit</span>`,
     whoami: () => `jessica ngo — senior backend engineer · ex-pro CS player · vancouver`,
-    ls: () => `archives/  quest-board/  inventory/  trophy-hall/  tavern/  resume.pdf  fragmovie.mp4`,
-    about: () => { go('archives'); return `<span class="ok">→ traveling to archives</span>`; },
-    work: () => { go('quest-board'); return `<span class="ok">→ traveling to quest board</span>`; },
-    projects: () => { go('inventory'); return `<span class="ok">→ traveling to shop</span>`; },
-    esports: () => { go('trophy'); return `<span class="ok">→ traveling to trophy hall</span>`; },
-    contact: () => { go('tavern'); return `<span class="ok">→ traveling to tavern</span>`; },
+    ls: () => `about/  experience/  projects/  esports/  contact/  resume.pdf  fragmovie.mp4`,
+    about: () => { go('archives'); return `<span class="ok">→ traveling to about me</span>`; },
+    work: () => { go('quest-board'); return `<span class="ok">→ traveling to experience</span>`; },
+    projects: () => { go('inventory'); return `<span class="ok">→ traveling to projects</span>`; },
+    esports: () => { go('trophy'); return `<span class="ok">→ traveling to esports</span>`; },
+    contact: () => { go('tavern'); return `<span class="ok">→ traveling to contact</span>`; },
     hire: () => { location.href = 'mailto:jessica.ngo@live.com'; return `<span class="ok">opening mailto:jessica.ngo@live.com ...</span>`; },
     gg: () => `<span class="hot">gg wp. dm me.</span>`,
     'rush b': () => { achievement('rushb', 'Rushed B', 15); return `<span class="warn">rushing b — 4 flashes, 2 smokes.</span> <span class="muted">(easter egg found)</span>`; },
@@ -3381,15 +3837,114 @@
   });
 
   // ==================================================================
-  //  Sound toggle (stub — off by default, just stored for now)
+  //  Sound effects (Web Audio, synthesized — no asset files)
+  //  Off by default; persist preference in localStorage.
   // ==================================================================
+  const SFX_KEY = 'jn-sfx';
   const soundBtn = document.getElementById('soundBtn');
-  let soundOn = false;
-  soundBtn.addEventListener('click', () => {
-    soundOn = !soundOn;
+  let soundOn = localStorage.getItem(SFX_KEY) === '1';
+  let actx = null;
+
+  function ensureCtx() {
+    if (!actx) {
+      try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) { return null; }
+    }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+
+  // Generic blip: oscillator → gain envelope → out
+  function blip(freq, dur = 0.08, type = 'square', startGain = 0.18, opts = {}) {
+    if (!soundOn) return;
+    const ctx = ensureCtx(); if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const g   = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (opts.endFreq) {
+      osc.frequency.exponentialRampToValueAtTime(opts.endFreq, ctx.currentTime + dur);
+    }
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(startGain, ctx.currentTime + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + dur + 0.02);
+  }
+
+  function sfxClick() { blip(880, 0.04, 'square', 0.10); }
+
+  function sfxCoin() {
+    if (!soundOn) return;
+    // E5 → C6 quick arpeggio (classic mario coin)
+    blip(659.25, 0.08, 'square', 0.18);
+    setTimeout(() => blip(1046.5, 0.18, 'square', 0.18), 70);
+  }
+
+  function sfxCoffee() {
+    if (!soundOn) return;
+    const ctx = ensureCtx(); if (!ctx) return;
+    // Filtered short noise burst — "fwip"
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.18, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filt = ctx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.setValueAtTime(800, ctx.currentTime);
+    filt.frequency.exponentialRampToValueAtTime(2400, ctx.currentTime + 0.18);
+    filt.Q.value = 6;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    src.connect(filt).connect(g).connect(ctx.destination);
+    src.start();
+    src.stop(ctx.currentTime + 0.2);
+  }
+
+  function sfxPowerup() {
+    if (!soundOn) return;
+    // C5 E5 G5 C6 ascending — triumphant
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((f, i) => setTimeout(() => blip(f, 0.16, 'square', 0.22), i * 90));
+  }
+
+  function applySoundUI() {
     soundBtn.classList.toggle('on', soundOn);
     soundBtn.textContent = soundOn ? 'SFX ON' : 'SFX OFF';
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    soundBtn.title = soundOn ? 'Mute sound effects' : 'Enable sound effects';
+  }
+  applySoundUI();
+
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    localStorage.setItem(SFX_KEY, soundOn ? '1' : '0');
+    if (soundOn) {
+      ensureCtx(); // unlock on user gesture
+      blip(880, 0.04, 'square', 0.10); // confirmation tick (bypasses soundOn check via direct blip — but blip checks soundOn... use ctx directly)
+    }
+    applySoundUI();
   });
+
+  // Expose for other handlers to call
+  window.__sfx = { click: sfxClick, coin: sfxCoin, coffee: sfxCoffee, powerup: sfxPowerup };
+
+  // Wire up sounds across the UI
+  // 1) Generic clicks: nav buttons, pins, back-btn, brand, crates, members, toggles
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a, .pin, .crate, .member, .nav-btn, .back-btn');
+    // Avoid double-blip on coin/caffeine pickups (they have their own sound)
+    if (!t) return;
+    if (t.classList.contains('coin-pickup') || t.classList.contains('caffeine-pickup')) return;
+    sfxClick();
+  }, true);
 
   // Welcome achievement on first visit to map
   setTimeout(() => achievement('start', 'Press Start', 5), 400);
@@ -3481,6 +4036,74 @@
     writeView(next);
     applyView(next);
   });
+
+  // ==================================================================
+  //  Mobile menu toggle (hamburger collapses theme/view/sfx on mobile)
+  // ==================================================================
+  const menuToggleBtn = document.getElementById('menuToggle');
+  const topRightToggles = document.getElementById('topRightToggles');
+  if (menuToggleBtn && topRightToggles) {
+    menuToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = topRightToggles.classList.toggle('open');
+      menuToggleBtn.setAttribute('aria-expanded', String(open));
+    });
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!topRightToggles.contains(e.target) && topRightToggles.classList.contains('open')) {
+        topRightToggles.classList.remove('open');
+        menuToggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    // Close menu when an action inside it is taken
+    topRightToggles.querySelectorAll('.menu-content button').forEach(b => {
+      b.addEventListener('click', () => {
+        topRightToggles.classList.remove('open');
+        menuToggleBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  // ==================================================================
+  //  Wizard NPC + first-visit welcome banner
+  // ==================================================================
+  const wizard = document.getElementById('wizardNpc');
+  if (wizard) {
+    wizard.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      writeView('clean');
+      applyView('clean');
+      achievement('wizard', 'Talked to the Wizard', 20);
+    });
+  }
+
+  // Welcome banner: show once on first visit (skip if already seen, or in clean-mode)
+  const SEEN_KEY = 'jn_seenwelcome';
+  const banner = document.getElementById('welcomeBanner');
+  function showWelcome() {
+    if (!banner) return;
+    if (document.body.classList.contains('clean-mode')) return;
+    if (localStorage.getItem(SEEN_KEY) === '1') return;
+    banner.hidden = false;
+  }
+  function dismissWelcome() {
+    if (!banner) return;
+    banner.hidden = true;
+    localStorage.setItem(SEEN_KEY, '1');
+  }
+  const wbClose   = document.getElementById('wbClose');
+  const wbClean   = document.getElementById('wbCleanBtn');
+  const wbExplore = document.getElementById('wbExploreBtn');
+  if (wbClose)   wbClose.addEventListener('click', dismissWelcome);
+  if (wbExplore) wbExplore.addEventListener('click', dismissWelcome);
+  if (wbClean)   wbClean.addEventListener('click', () => {
+    dismissWelcome();
+    writeView('clean');
+    applyView('clean');
+  });
+  // Delay slightly so it doesn't compete with the "Press Start" toast
+  setTimeout(showWelcome, 600);
 
 })();
 </script>
