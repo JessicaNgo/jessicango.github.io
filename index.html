@@ -3439,8 +3439,6 @@
     const h = location.hash.replace('#','') || 'map';
     return scenes[h] ? h : 'map';
   }
-  go(fromHash(), { replace: true });
-  window.addEventListener('hashchange', () => go(fromHash(), { replace: true }));
 
   // Wire nav
   document.addEventListener('click', (e) => {
@@ -3559,6 +3557,12 @@
       typewriterState.set(dlg, true);
     };
   }
+
+  // Kick off routing now that dialogues + runTypewriter are initialized.
+  // Must run after `const dialogues` to avoid a TDZ ReferenceError when the
+  // page is loaded directly at a non-map hash (#archives, etc.).
+  go(fromHash(), { replace: true });
+  window.addEventListener('hashchange', () => go(fromHash(), { replace: true }));
 
   // ==================================================================
   //  Sprite animation (blink + occasional type)
